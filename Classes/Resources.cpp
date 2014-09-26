@@ -11,18 +11,18 @@
 using namespace std;
 using namespace CocosDenshion;
 
-const Resource iphoneResource = { cocos2d::CCSizeMake(640, 1136), "iphone" };
-const Resource ipadResource = { cocos2d::CCSizeMake(640, 960), "ipad" };
+const Resource iphone5Resource = { cocos2d::CCSizeMake(640, 1136), "iphone" };
+const Resource iphone4Resource = { cocos2d::CCSizeMake(640, 960), "ipad" };
 
-#define ASPECT_RATIO (640.0f/960.f+640.0f/1136.0f)/2
+#define ASPECT_RATIO_4_5 (640.0f/960.f+640.0f/1136.0f)/2
 
 LocalResources::LocalResources() {
 	CCEGLView* pEGLView = CCEGLView::sharedOpenGLView();
 	CCSize frameSize = pEGLView->getFrameSize();
-	if (frameSize.width / frameSize.height > ASPECT_RATIO) {
-		resource = ipadResource;
+	if (frameSize.width / frameSize.height > ASPECT_RATIO_4_5) {
+		resource = iphone4Resource;
 	} else {
-		resource = iphoneResource;
+		resource = iphone5Resource;
 	}
 	prepareResPath();
 	loadConf();
@@ -85,28 +85,23 @@ const CCString* LocalResources::resoByKey(const char * key) {
 }
 
 void LocalResources::prepareResPath() {
+	CCFileUtils::sharedFileUtils()->purgeCachedEntries();
+	/*-- Add the Search Directory --*/
+	ccLanguageType languageType =
+			CCApplication::sharedApplication()->getCurrentLanguage();
+	string lang;
+	if (kLanguageChinese == languageType) {
+		lang = "zh_cn";
+	} else {
+		lang = "en_us";
+	}
+	CCFileUtils::sharedFileUtils()->addSearchPath(lang.c_str());
+	CCFileUtils::sharedFileUtils()->addSearchPath("global");
+
 	/*-- Add the Directory Base on Resolution --*/
 	string dir = resource.directory;
 	CCFileUtils::sharedFileUtils()->addSearchResolutionsOrder(
 			(dir + "/").c_str());
-	CCFileUtils::sharedFileUtils()->addSearchResolutionsOrder("global/");
-
-	/*-- Add the Directory Base on Language --*/
-	ccLanguageType languageType =
-			CCApplication::sharedApplication()->getCurrentLanguage();
-	std::string lang_str;
-	if (kLanguageChinese == languageType)
-		lang_str = "zh_cn";
-	else
-		lang_str = "en_us";
-
-	vector<std::string> pathVector =
-			CCFileUtils::sharedFileUtils()->getSearchResolutionsOrder();
-	for (vector<string>::const_iterator it = pathVector.begin();
-			it < pathVector.end(); ++it) {
-		CCFileUtils::sharedFileUtils()->addSearchResolutionsOrder(
-				((*it) + lang_str + "/").c_str());
-	}
 }
 
 void LocalResources::loadConf() {
@@ -156,16 +151,32 @@ void LocalResources::loadResources() {
 	/*-- 图片 --*/
 	CCTextureCache::sharedTextureCache()->addImage(("background.png"));
 	CCTextureCache::sharedTextureCache()->addImage(("bg_cloud.png"));
+	CCTextureCache::sharedTextureCache()->addImage(("bg_cloud_small.png"));
 	CCTextureCache::sharedTextureCache()->addImage(("btn_big.png"));
 	CCTextureCache::sharedTextureCache()->addImage(("btn_small.png"));
 	CCTextureCache::sharedTextureCache()->addImage(("btn_sound_on.png"));
 	CCTextureCache::sharedTextureCache()->addImage(("btn_sound_off.png"));
+	CCTextureCache::sharedTextureCache()->addImage(("item_cubic.png"));
+	CCTextureCache::sharedTextureCache()->addImage(("mushroom.png"));
 
 	/*-- 声音 --*/
-	//SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("gameover.mp3");
+	SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("bgm.mp3");
 	//SimpleAudioEngine::sharedEngine()->preloadEffect("jump.mp3");
 	/*-- 动画 --*/
 
+}
+
+void LocalResources::playBgMusic() {
+	if (LOCAL_CONTEXT->isSound()
+	&& !SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying()) {
+		SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
+	}
+}
+
+void LocalResources::playEffect(const char * mp3) {
+	if (LOCAL_CONTEXT->isSound()) {
+		SimpleAudioEngine::sharedEngine()->playEffect(mp3);
+	}
 }
 
 Context::Context() :
@@ -180,7 +191,6 @@ Context * Context::sharedContext() {
 	static Context* res = NULL;
 	if (!res) {
 		res = new Context();
-		res->playBgMusic();
 	}
 	return res;
 }
@@ -197,13 +207,6 @@ void Context::load() {
 			true);
 	this->highScore = CCUserDefault::sharedUserDefault()->getIntegerForKey(
 			"highScore", 0);
-}
-
-void Context::playBgMusic() {
-	if (this->isSound()
-			&& !SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying()) {
-		SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
-	}
 }
 
 bool Context::isSound() const {
@@ -237,7 +240,7 @@ unsigned int Context::increaseScore() {
 
 void Context::clearScore() {
 	score = 0;
-	newrecord = true;
+	newrecord = false;
 }
 
 unsigned int Context::getScore() const {

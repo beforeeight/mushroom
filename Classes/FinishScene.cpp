@@ -78,14 +78,15 @@ bool FinishLayer::init() {
 		CCMenuItemImage *againbg = CCMenuItemImage::create(("btn_big.png"),
 				("btn_big.png"));
 		againbg->setTarget(againbg, menu_selector(FinishLayer::onAgainItem));
-		CCMenuItemFont *againtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_again")->getCString());
+		CCNode *againtxt = CCLabelBMFont::create(LOCAL_RESOURCES->valueByKey("i18n_again")->getCString(),"fonts.fnt");
+		//CCMenuItemFont *againtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_again")->getCString());
 		againbg->setAnchorPoint(ccp(0.5, 0.5));
 		againbg->setPosition(ccpp(0, -0.07));
 		againtxt->setPosition(
 				ccp(againbg->getContentSize().width / 2,
 						againbg->getContentSize().height / 2));
 		againtxt->setAnchorPoint(ccp(0.5, 0.5));
-		againtxt->setColor(LOCAL_CONTEXT->getFontColor());
+		//againtxt->setColor(LOCAL_CONTEXT->getFontColor());
 		againbg->addChild(againtxt);
 		this->addChild(againbg);
 
@@ -93,14 +94,15 @@ bool FinishLayer::init() {
 		CCMenuItemImage *sharebg = CCMenuItemImage::create(("btn_big.png"),
 				("btn_big.png"));
 		sharebg->setTarget(sharebg, menu_selector(FinishLayer::onShareItem));
-		CCMenuItemFont *sharetxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_share")->getCString());
+		CCNode *sharetxt = CCLabelBMFont::create(LOCAL_RESOURCES->valueByKey("i18n_share")->getCString(),"fonts.fnt");
+		//CCMenuItemFont *sharetxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_share")->getCString());
 		sharebg->setAnchorPoint(ccp(0.5, 0.5));
 		sharebg->setPosition(ccpp(0, -0.19));
 		sharetxt->setPosition(
 				ccp(sharebg->getContentSize().width / 2,
 						sharebg->getContentSize().height / 2));
 		sharetxt->setAnchorPoint(ccp(0.5, 0.5));
-		sharetxt->setColor(LOCAL_CONTEXT->getFontColor());
+		//sharetxt->setColor(LOCAL_CONTEXT->getFontColor());
 		sharebg->addChild(sharetxt);
 		this->addChild(sharebg);
 
@@ -108,14 +110,15 @@ bool FinishLayer::init() {
 		CCMenuItemImage *backbg = CCMenuItemImage::create(("btn_big.png"),
 				("btn_big.png"));
 		backbg->setTarget(this, menu_selector(FinishLayer::onBackItem));
-		CCMenuItemFont *backtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_back")->getCString());
+		CCNode *backtxt = CCLabelBMFont::create(LOCAL_RESOURCES->valueByKey("i18n_back")->getCString(),"fonts.fnt");
+		//CCMenuItemFont *backtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_back")->getCString());
 		backbg->setAnchorPoint(ccp(0.5, 0.5));
 		backbg->setPosition(ccpp(0, -0.31));
 		backtxt->setPosition(
 				ccp(backbg->getContentSize().width / 2,
 						backbg->getContentSize().height / 2));
 		backtxt->setAnchorPoint(ccp(0.5, 0.5));
-		backtxt->setColor(LOCAL_CONTEXT->getFontColor());
+		//backtxt->setColor(LOCAL_CONTEXT->getFontColor());
 		backbg->addChild(backtxt);
 		this->addChild(backbg);
 

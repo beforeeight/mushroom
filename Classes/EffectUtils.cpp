@@ -29,6 +29,7 @@ void effect::clickButtonSound(CCMenuItemImage *bg, CCSprite *txt) {
 
 void effect::clickButton(CCMenuItem *p_sender) {
 	p_sender->setEnabled(false);
+	LOCAL_RESOURCES->playEffect("click.mp3");
 	p_sender->runAction(
 			CCSequence::create(CCScaleBy::create(0.1f, 0.95f),
 					CCScaleBy::create(0.1f, 10.0 / 9.5f),
@@ -40,6 +41,7 @@ void effect::clickButton(CCMenuItem *p_sender) {
 void effect::clickButton(CCMenuItem *p_sender, CCObject *target,
 		SEL_CallFunc func) {
 	p_sender->setEnabled(false);
+	LOCAL_RESOURCES->playEffect("click.mp3");
 	p_sender->runAction(
 			CCSequence::create(CCScaleBy::create(0.1f, 0.95f),
 					CCScaleBy::create(0.1f, 10.0 / 9.5f),

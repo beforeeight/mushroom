@@ -17,8 +17,8 @@ typedef struct tagResource {
 	char directory[100];
 } Resource;
 
-extern const Resource iphoneResource;
-extern const Resource ipadResource;
+extern const Resource iphone5Resource;
+extern const Resource iphone4Resource;
 
 class LocalResources {
 
@@ -32,6 +32,10 @@ public:
 	CCSize designResolutionSize();
 
 	const CCString* valueByKey(const char * key);
+
+	void playBgMusic();
+
+	void playEffect(const char * mp3);
 
 private:
 	Resource resource;
@@ -71,8 +75,6 @@ public:
 
 	bool isSound() const;
 
-	void playBgMusic();
-
 	void onSound();
 
 	void offSound();
@@ -99,6 +101,8 @@ private:
 #define LOCAL_RESOURCES LocalResources::sharedResources()
 
 #define LOCAL_RESOLUTION LocalResources::sharedResources()->designResolutionSize()
+
+#define LOCAL_RESOLUTION_WIDTH LocalResources::sharedResources()->designResolutionSize().width
 
 #define LOCAL_CONTEXT Context::sharedContext()
 

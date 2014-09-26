@@ -27,6 +27,8 @@ public:
 private:
 	bool running;
 
+	CCSpriteBatchNode *brick;
+
 	void onPauseItem(CCObject *object);
 
 	void onResumeItem(CCObject *object);
@@ -46,6 +48,8 @@ private:
 	void resume();
 
 	void backMenu();
+
+	virtual void update(float delta);
 };
 
 #endif /* GAMESCENE_H_ */
