@@ -9,6 +9,7 @@
 #define GAMESCENE_H_
 
 #include "Resources.h"
+#include "Brick.h"
 
 class GameLayer: public CCLayer {
 public:
@@ -27,7 +28,7 @@ public:
 private:
 	bool running;
 
-	CCSpriteBatchNode *brick;
+	BatchBrick *batchBrick;
 
 	void onPauseItem(CCObject *object);
 

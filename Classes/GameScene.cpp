@@ -10,7 +10,6 @@
 #include "EffectUtils.h"
 #include "Menu.h"
 #include "FinishScene.h"
-#include "Brick.h"
 
 #define TAG_LAYER_GAME 0
 #define TAG_LAYER_PAUSE 1
@@ -18,10 +17,9 @@
 
 GameLayer::GameLayer() :
 		running(true) {
-	brick = CCSpriteBatchNode::createWithTexture(
-			CCTextureCache::sharedTextureCache()->textureForKey(TEXTURE_BRICK));
-	if (brick) {
-		this->addChild(brick);
+	batchBrick = BatchBrick::create();
+	if (batchBrick) {
+		this->addChild(batchBrick);
 	}
 }
 
@@ -48,6 +46,7 @@ bool GameLayer::init() {
 		score->setPosition(ccpp(0.5,0.5));
 		this->addChild(score,0,TAG_SCORE);
 
+		this->batchBrick->initBricks();
 		return true;
 
 	} else {
@@ -75,8 +74,6 @@ CCScene * GameLayer::scene() {
 
 bool GameLayer::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent) {
 	//CCDirector::sharedDirector()->replaceScene(FinishLayer::scene());
-	Brick *b = Brick::create();
-	brick->addChild(b);
 	return true;
 }
 
@@ -186,18 +183,10 @@ void GameLayer::gameover() {
 }
 
 void GameLayer::update(float delta) {
-	float32 timeStep = 1.0f / 60.0f;
+
+	float32 timeStep = CCDirector::sharedDirector()->getAnimationInterval();
 	int32 velocityIterations = 6;
 	int32 positionIterations = 2;
 	b2World *world = PhyWorld::shareWorld();
 	world->Step(timeStep, velocityIterations, positionIterations);
-	for (b2Body *b = world->GetBodyList(); b; b = b->GetNext()) {
-		if (b->GetUserData() != NULL) {
-			CCSprite *myActor = (CCSprite*) b->GetUserData();
-			myActor->setPosition(
-					ccp(p2c(b->GetPosition().x), p2c(b->GetPosition().y )));
-			myActor->setRotation(-1 * CC_RADIANS_TO_DEGREES(b->GetAngle()));
-
-		}
-	}
 }
