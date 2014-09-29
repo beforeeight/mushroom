@@ -10,20 +10,25 @@
 #include "EffectUtils.h"
 #include "Menu.h"
 #include "FinishScene.h"
+#include "Mushroom.h"
 
 #define TAG_LAYER_GAME 0
 #define TAG_LAYER_PAUSE 1
 #define TAG_SCORE 3
 
 GameLayer::GameLayer() :
-		running(true) {
-	batchBrick = BatchBrick::create();
-	if (batchBrick) {
-		this->addChild(batchBrick);
-	}
+		running(true), leftBody(0), rightBody(0) {
+	brickEmitter = new BrickEmitter(*this);
 }
 
 GameLayer::~GameLayer() {
+	CC_SAFE_DELETE(brickEmitter);
+	if (leftBody) {
+		PhyWorld::shareWorld()->DestroyBody(leftBody);
+	}
+	if (rightBody) {
+		PhyWorld::shareWorld()->DestroyBody(rightBody);
+	}
 }
 
 bool GameLayer::init() {
@@ -46,7 +51,45 @@ bool GameLayer::init() {
 		score->setPosition(ccpp(0.5,0.5));
 		this->addChild(score,0,TAG_SCORE);
 
-		this->batchBrick->initBricks();
+		CCPoint ltp=ccpp(-0.5,0.5);
+		CCPoint lbp=ccpp(-0.5,-0.5);
+		CCPoint rtp=ccpp(0.5,0.5);
+		CCPoint rbp=ccpp(0.5,-0.5);
+//
+//		b2BodyDef leftBodyDef;
+//		leftBodyDef.position.Set(c2p(ltp.x), c2p(ltp.y));
+//		leftBodyDef.type = b2_staticBody;
+//		this->leftBody = PhyWorld::shareWorld()->CreateBody(&leftBodyDef);
+//		b2EdgeShape leftShape;
+//		CCLog("%f,%f,%f,%f",c2p(ltp.x), c2p(ltp.y),c2p(lbp.x), c2p(lbp.y));
+//		leftShape.Set(b2Vec2(c2p(ltp.x), c2p(ltp.y)), b2Vec2(c2p(lbp.x), c2p(lbp.y)));
+//		leftBody->CreateFixture(&leftShape, 0.0f);
+//
+//		b2BodyDef rightBodyDef;
+//		rightBodyDef.position.Set(c2p(rtp.x), c2p(rtp.y));
+//		this->rightBody = PhyWorld::shareWorld()->CreateBody(&rightBodyDef);
+//		b2EdgeShape rightShape;
+//		rightShape.Set(b2Vec2(c2p(rtp.x), c2p(rtp.y)), b2Vec2(c2p(rbp.x), c2p(rbp.y)));
+//		rightBody->CreateFixture(&rightShape, 0.0f);
+
+//		CCPoint gp1=ccpp(-0.5,-0.2);
+//		CCPoint gp2=ccpp(0.5,-0.2);
+//		b2BodyDef groundBodyDef;
+//		groundBodyDef.position.Set(c2p(gp1.x), c2p(gp1.y));
+//		b2Body *groundBody = PhyWorld::shareWorld()->CreateBody(&groundBodyDef);
+//
+//		b2EdgeShape groundShape;
+//		groundShape.Set(b2Vec2(c2p(gp1.x), c2p(gp1.y)), b2Vec2(c2p(gp2.x), c2p(gp2.y)));
+//		groundBody->CreateFixture(&groundShape, 0.0f);
+
+
+
+		Mushroom *mushroom = Mushroom::create();
+		mushroom->setPosition(ccpp(-0.2,0.5));
+		PhySprite::initPhySprite(*mushroom);
+		this->addChild(mushroom);
+
+		this->brickEmitter->initBricks();
 		return true;
 
 	} else {

@@ -8,7 +8,7 @@
 #ifndef BRICK_H_
 #define BRICK_H_
 
-#include "cocos2d.h"
+#include "PhySprite.h"
 #include "PhyWorld.h"
 
 #define TEXTURE_BRICK "item_cubic.png"
@@ -20,7 +20,7 @@ enum BrickStatus {
 //b2_bulletBody,
 };
 
-class Brick: public cocos2d::CCSprite {
+class Brick: public CCSprite {
 public:
 	Brick();
 
@@ -30,40 +30,59 @@ public:
 
 	CREATE_FUNC(Brick)
 
+};
+
+class BrickEmitter;
+
+/*--------- Class Bricks --------*/
+class Bricks: public PhySprite {
+
+public:
+	Bricks();
+
+	virtual ~Bricks();
+
+	virtual bool init(int num);
+
+	static Bricks* create(int num);
+
 	virtual void update(float delta);
 
-	friend class BatchBrick;
+	friend class BrickEmitter;
+
+protected:
+	virtual void createPhyBody();
+
+	virtual void initPhyBody();
 
 private:
+	Bricks *previous, *next;
+
+	BrickEmitter *emitter;
+
 	BrickStatus status;
-
-	b2Body *b2body;
-
-	bool callbackEmitter;
-
-	void createPhyBody();
 
 	void updateStatus();
 };
 
-class BatchBrick: public cocos2d::CCSpriteBatchNode {
+/*--------- Class BatchBrick --------*/
+class BrickEmitter {
 
 public:
-	BatchBrick();
+	BrickEmitter(CCLayer &layer);
 
-	virtual ~BatchBrick();
-
-	virtual bool init();
-
-	CREATE_FUNC(BatchBrick)
+	virtual ~BrickEmitter();
 
 	void initBricks();
 
-	Brick * emitBrick(Brick *lastBrick);
+	Bricks * emitBrick(Bricks *lastBrick);
 
 private:
-	Brick* createBrick(const CCPoint& pos);
+	CCLayer &targetLayer;
 
+	Bricks* emitBrick(int num, Bricks* lastBrick);
+
+	CCPoint computeSpan(Bricks* lastBrick, Bricks* newBricks);
 };
 
 #endif /* BRICK_H_ */

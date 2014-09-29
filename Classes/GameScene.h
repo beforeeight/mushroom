@@ -28,7 +28,9 @@ public:
 private:
 	bool running;
 
-	BatchBrick *batchBrick;
+	BrickEmitter *brickEmitter;
+
+	b2Body *leftBody, *rightBody;
 
 	void onPauseItem(CCObject *object);
 

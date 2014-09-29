@@ -9,60 +9,61 @@
 
 USING_NS_CC;
 
-BatchBrick::BatchBrick() {
+#define BRICK_WIDTH CCTextureCache::sharedTextureCache()->textureForKey("item_cubic.png")->getContentSize().width
+#define BRICK_HEIGHT CCTextureCache::sharedTextureCache()->textureForKey("item_cubic.png")->getContentSize().height
+
+BrickEmitter::BrickEmitter(CCLayer &layer) :
+		targetLayer(layer) {
+	//this->targetLayer = layer;
+}
+
+BrickEmitter::~BrickEmitter() {
 
 }
 
-BatchBrick::~BatchBrick() {
-
+void BrickEmitter::initBricks() {
+	int num = 30;
+	Bricks* newBricks = Bricks::create(num);
+	newBricks->emitter = this;
+	newBricks->setPosition(ccpp(-0.5, 0));
+	PhySprite::initPhySprite(*newBricks);
+	this->targetLayer.addChild(newBricks);
 }
 
-void BatchBrick::initBricks() {
-	Brick* brick = Brick::create();
-	brick->setPosition(ccpp(-0.5,0)+ccp(brick->getContentSize().width / 2, 0));
-	this->addChild(brick);
-	brick->createPhyBody();
-	brick->scheduleUpdate();
-	while (brick->getPositionX() < ccpp(0.5,0).x) {
-		brick = createBrick(brick->getPosition()+ccp(brick->getContentSize().width,0));
+Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
+	Bricks* newBricks = Bricks::create(num);
+	newBricks->emitter = this;
+	if (lastBrick) {
+		newBricks->previous = lastBrick;
+		lastBrick->next = newBricks;
 	}
-	brick->callbackEmitter = true;
+	CCPoint pos = computeSpan(lastBrick, newBricks);
+	newBricks->setPosition(pos);
+	PhySprite::initPhySprite(*newBricks);
+	this->targetLayer.addChild(newBricks);
+	return newBricks;
 }
 
-bool BatchBrick::init() {
-	if (CCSpriteBatchNode::initWithTexture(
-			CCTextureCache::sharedTextureCache()->textureForKey(
-			TEXTURE_BRICK), 1000)) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-Brick * BatchBrick::emitBrick(Brick *lastBrick) {
+CCPoint BrickEmitter::computeSpan(Bricks* lastBrick, Bricks* newBricks) {
+	int num = rand() % 3 + 2;
 	CCPoint pos =
-			lastBrick->getPosition() + ccp(lastBrick->getContentSize().width, 0);
-	Brick* newBrick = createBrick(pos);
-	newBrick->callbackEmitter = true;
-	return newBrick;
+			lastBrick->getPosition() + ccp(lastBrick->getContentSize().width/2, 0) + ccp(newBricks->getContentSize().width/2, 0)+ccp(BRICK_WIDTH*num,0);
+	return pos;
 }
 
-Brick* BatchBrick::createBrick(const CCPoint& pos) {
-	Brick* newBrick = Brick::create();
-	newBrick->setPosition(pos);
-	this->addChild(newBrick);
-	newBrick->createPhyBody();
-	newBrick->scheduleUpdate();
-	return newBrick;
+Bricks * BrickEmitter::emitBrick(Bricks *lastBrick) {
+	int num = rand() % 5 + 5;
+	Bricks* newBricks = emitBrick(num, lastBrick);
+	return newBricks;
 }
 
-Brick::Brick() :
-		b2body(NULL), status(brick_ready), callbackEmitter(false) {
-	// TODO Auto-generated constructor stub
+/*------------ Single Brick ----------*/
+
+Brick::Brick() {
 }
 
 Brick::~Brick() {
-	PhyWorld::shareWorld()->DestroyBody(this->b2body);
+
 }
 
 bool Brick::init() {
@@ -76,7 +77,43 @@ bool Brick::init() {
 	}
 }
 
-void Brick::createPhyBody() {
+/*------------ Group Brick with b2Body ----------*/
+Bricks::Bricks() :
+		previous(0), next(0), emitter(0), status(brick_ready) {
+}
+
+Bricks::~Bricks() {
+}
+
+bool Bricks::init(int num) {
+	if (PhySprite::init()) {
+		for (int i = 0; i < num; i++) {
+			Brick *b = Brick::create();
+			b->setAnchorPoint(ccp(0.5, 0.5));
+			b->setPosition(ccp((i + 1 / 2) * b->getContentSize().width, 0));
+			this->addChild(b);
+		}
+		this->setAnchorPoint(ccp(0.5, 0.5));
+		this->setContentSize(CCSizeMake(BRICK_WIDTH*num, BRICK_HEIGHT));
+		return true;
+	} else {
+		return false;
+	}
+}
+
+Bricks* Bricks::create(int num) {
+	Bricks *pRet = new Bricks();
+	if (pRet && pRet->init(num)) {
+		pRet->autorelease();
+		return pRet;
+	} else {
+		delete pRet;
+		pRet = NULL;
+		return NULL;
+	}
+}
+
+void Bricks::createPhyBody() {
 	b2BodyDef b2BodyDef;
 	b2BodyDef.type = b2_kinematicBody;
 	b2BodyDef.position = b2Vec2(c2p(this->getPosition().x),
@@ -87,43 +124,42 @@ void Brick::createPhyBody() {
 	b2CircleShape.SetAsBox(c2p(this->getContentSize().width / 2),
 			c2p(this->getContentSize().height / 2));
 
-	// Define the dynamic body fixture.
+// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2CircleShape;
-	// Add the shape to the body.
+// Add the shape to the body.
 	b2body->CreateFixture(&fixtureDef);
 	b2body->SetUserData(this);
-	b2body->SetLinearVelocity(b2Vec2(-0.5f, 0));
 }
 
-void Brick::update(float delta) {
-	//检测是否出边界
+void Bricks::initPhyBody() {
+	if (b2body) {
+		b2body->SetLinearVelocity(b2Vec2(-1, 0));
+	}
+}
+void Bricks::update(float delta) {
+//检测是否出边界
 	updateStatus();
 	if (this->status == brick_over) {
 		this->removeFromParent();
 		return;
 	}
-	if (b2body) {
-		this->setPosition(
-				ccp(p2c(b2body->GetPosition().x),
-						p2c(b2body->GetPosition().y )));
-		this->setRotation(-1 * CC_RADIANS_TO_DEGREES(b2body->GetAngle()));
-	}
+	PhySprite::update(delta);
 }
 
-void Brick::updateStatus() {
+void Bricks::updateStatus() {
 	CCPoint p = this->getPosition() + ccp(this->getContentSize().width / 2, 0);
-	if ((this->status == brick_running || this->status == brick_ready)
-			&& p.x < ccpp(-0.5, -1).x) {
-		this->status = brick_over;
-		return;
-	}
+
 	if (this->status == brick_ready && p.x < ccpp(0.5, 0).x) {
-		if(callbackEmitter) {
-			BatchBrick *batch = (BatchBrick *) this->getParent();
-			batch->emitBrick(this);
-		}
+		this->emitter->emitBrick(this);
 		this->status = brick_running;
 		return;
 	}
-}
+
+	if ((this->status == brick_running || this->status == brick_ready)
+			&& p.x < ccpp(-0.5, -1).x) {
+				this->status = brick_over;
+				return;
+			}
+		}
+
