@@ -89,11 +89,15 @@ bool Bricks::init(int num) {
 	if (PhySprite::init()) {
 		for (int i = 0; i < num; i++) {
 			Brick *b = Brick::create();
-			b->setAnchorPoint(ccp(0.5, 0.5));
+			b->setAnchorPoint(ccp(0, 0));
 			b->setPosition(ccp((i + 1 / 2) * b->getContentSize().width, 0));
 			this->addChild(b);
 		}
 		this->setAnchorPoint(ccp(0.5, 0.5));
+		CCLog("w,h = %f,%f", BRICK_WIDTH*num,BRICK_HEIGHT);
+		CCLog("w,h = %f,%f",
+				CCDirector::sharedDirector()->getOpenGLView()->getFrameSize().width,
+				CCDirector::sharedDirector()->getOpenGLView()->getVisibleSize().width);
 		this->setContentSize(CCSizeMake(BRICK_WIDTH*num, BRICK_HEIGHT));
 		return true;
 	} else {
@@ -129,6 +133,7 @@ void Bricks::createPhyBody() {
 	fixtureDef.shape = &b2CircleShape;
 // Add the shape to the body.
 	b2body->CreateFixture(&fixtureDef);
+	b2body->SetLinearDamping(0.0f);
 	b2body->SetUserData(this);
 }
 

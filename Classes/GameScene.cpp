@@ -16,6 +16,11 @@
 #define TAG_LAYER_PAUSE 1
 #define TAG_SCORE 3
 
+#define TAG_MUSHROOM 10
+#define TAG_BTN_LEFT 11
+#define TAG_BTN_RIGHT 12
+#define TAG_BTN_JUMP 13
+
 GameLayer::GameLayer() :
 		running(true), leftBody(0), rightBody(0) {
 	brickEmitter = new BrickEmitter(*this);
@@ -31,11 +36,21 @@ GameLayer::~GameLayer() {
 	}
 }
 
+void GameLayer::draw() {
+	//glDisable(GL_TEXTURE_2D);
+	//glDisableClientState(GL_COLOR_ARRAY);
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	PhyWorld::shareWorld()->DrawDebugData(); //这个一定要写
+	//glEnable(GL_TEXTURE_2D);
+	//glEnableClientState(GL_COLOR_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
 bool GameLayer::init() {
 	if (CCLayer::init()) {
 		LOCAL_CONTEXT->clearScore();
 
-		this->setTouchMode(kCCTouchesOneByOne);
+		this->setTouchMode(kCCTouchesAllAtOnce);
 		this->setTouchEnabled(true);
 		this->scheduleUpdate();
 		CCSize s = CCDirector::sharedDirector()->getWinSize();
@@ -56,45 +71,76 @@ bool GameLayer::init() {
 		CCPoint rtp=ccpp(0.5,0.5);
 		CCPoint rbp=ccpp(0.5,-0.5);
 //
-//		b2BodyDef leftBodyDef;
-//		leftBodyDef.position.Set(c2p(ltp.x), c2p(ltp.y));
-//		leftBodyDef.type = b2_staticBody;
-//		this->leftBody = PhyWorld::shareWorld()->CreateBody(&leftBodyDef);
-//		b2EdgeShape leftShape;
-//		CCLog("%f,%f,%f,%f",c2p(ltp.x), c2p(ltp.y),c2p(lbp.x), c2p(lbp.y));
-//		leftShape.Set(b2Vec2(c2p(ltp.x), c2p(ltp.y)), b2Vec2(c2p(lbp.x), c2p(lbp.y)));
-//		leftBody->CreateFixture(&leftShape, 0.0f);
-//
-//		b2BodyDef rightBodyDef;
-//		rightBodyDef.position.Set(c2p(rtp.x), c2p(rtp.y));
-//		this->rightBody = PhyWorld::shareWorld()->CreateBody(&rightBodyDef);
-//		b2EdgeShape rightShape;
-//		rightShape.Set(b2Vec2(c2p(rtp.x), c2p(rtp.y)), b2Vec2(c2p(rbp.x), c2p(rbp.y)));
-//		rightBody->CreateFixture(&rightShape, 0.0f);
+		b2BodyDef leftBodyDef;
+		leftBodyDef.position.Set(0, 0);
+		leftBodyDef.type = b2_staticBody;
+		this->leftBody = PhyWorld::shareWorld()->CreateBody(&leftBodyDef);
+		b2EdgeShape leftShape;
+		leftShape.Set(b2Vec2(c2p(ltp.x), c2p(ltp.y)), b2Vec2(c2p(lbp.x), c2p(lbp.y)));
+		leftBody->CreateFixture(&leftShape, 0.0f);
 
-//		CCPoint gp1=ccpp(-0.5,-0.2);
-//		CCPoint gp2=ccpp(0.5,-0.2);
-//		b2BodyDef groundBodyDef;
-//		groundBodyDef.position.Set(c2p(gp1.x), c2p(gp1.y));
-//		b2Body *groundBody = PhyWorld::shareWorld()->CreateBody(&groundBodyDef);
-//
-//		b2EdgeShape groundShape;
-//		groundShape.Set(b2Vec2(c2p(gp1.x), c2p(gp1.y)), b2Vec2(c2p(gp2.x), c2p(gp2.y)));
-//		groundBody->CreateFixture(&groundShape, 0.0f);
-
-
+		b2BodyDef rightBodyDef;
+		rightBodyDef.position.Set(0, 0);
+		this->rightBody = PhyWorld::shareWorld()->CreateBody(&rightBodyDef);
+		b2EdgeShape rightShape;
+		rightShape.Set(b2Vec2(c2p(rtp.x), c2p(rtp.y)), b2Vec2(c2p(rbp.x), c2p(rbp.y)));
+		rightBody->CreateFixture(&rightShape, 0.0f);
 
 		Mushroom *mushroom = Mushroom::create();
 		mushroom->setPosition(ccpp(-0.2,0.5));
 		PhySprite::initPhySprite(*mushroom);
-		this->addChild(mushroom);
+		this->addChild(mushroom,10,TAG_MUSHROOM);
 
 		this->brickEmitter->initBricks();
+
+		/* control button */
+		CCSprite *leftBtn = CCSprite::create("btn_left.png");
+		leftBtn->setAnchorPoint(ccp(0.5,0.5));
+		leftBtn->setPosition(ccpp(-0.35,-0.2));
+		this->addChild(leftBtn,9,TAG_BTN_LEFT);
+		CCSprite *rightBtn = CCSprite::create("btn_right.png");
+		rightBtn->setAnchorPoint(ccp(0.5,0.5));
+		rightBtn->setPosition(ccpp(-0.1,-0.2));
+		this->addChild(rightBtn,9,TAG_BTN_RIGHT);
+		CCSprite *jumpBtn = CCSprite::create("btn_jump.png");
+		jumpBtn->setAnchorPoint(ccp(0.5,0.5));
+		jumpBtn->setPosition(ccpp(0.35,-0.2));
+		this->addChild(jumpBtn,9,TAG_BTN_JUMP);
+		draw();
 		return true;
 
 	} else {
 		return false;
 	}
+}
+
+void GameLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent) {
+	CCLog("ccTouchesBegan %d",pTouches->count());
+	Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
+	for (CCSetIterator it = pTouches->begin(); it != pTouches->end(); it++) {
+		CCTouch* touch = (CCTouch*) *it;
+		CCPoint point = touch->getLocationInView();
+		if (this->getChildByTag(TAG_BTN_RIGHT)->boundingBox().containsPoint(
+				point)) {
+			CCLog("forward");
+			mushroom->setVec(vec_forward);
+		} else if (this->getChildByTag(TAG_BTN_LEFT)->boundingBox().containsPoint(
+				point)) {
+			CCLog("back");
+			mushroom->setVec(vec_back);
+		} else if (this->getChildByTag(TAG_BTN_JUMP)->boundingBox().containsPoint(
+				point)) {
+			CCLog("jump");
+			mushroom->jump();
+		}
+	}
+}
+void GameLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent) {
+
+}
+void GameLayer::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent) {
+	Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
+	mushroom->setVec(vec_stop);
 }
 
 CCScene * GameLayer::scene() {
@@ -113,11 +159,6 @@ CCScene * GameLayer::scene() {
 		return NULL;
 	}
 
-}
-
-bool GameLayer::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent) {
-	//CCDirector::sharedDirector()->replaceScene(FinishLayer::scene());
-	return true;
 }
 
 void GameLayer::onPauseItem(CCObject *object) {

@@ -10,7 +10,7 @@
 #include <Box2D/Box2D.h>
 #include "Resources.h"
 
-#define PHYSICAL_WIDTH 5
+#define PHYSICAL_WIDTH 20
 
 class PhyWorld {
 public:
@@ -21,7 +21,7 @@ public:
 	static b2World* shareWorld(void);
 };
 
-#define p2c(__x__) __x__*(LOCAL_RESOLUTION_WIDTH/PHYSICAL_WIDTH)
-#define c2p(__x__) __x__/(LOCAL_RESOLUTION_WIDTH/PHYSICAL_WIDTH)
+#define p2c(__x__) __x__*32
+#define c2p(__x__) __x__/32
 
 #endif /* PHYWORLD_H_ */

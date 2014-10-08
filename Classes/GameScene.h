@@ -23,7 +23,11 @@ public:
 
 	static CCScene * scene();
 
-	virtual bool ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
+	virtual void draw(void);
+
+    virtual void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
+    virtual void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
+    virtual void ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent);
 
 private:
 	bool running;
@@ -53,6 +57,7 @@ private:
 	void backMenu();
 
 	virtual void update(float delta);
+
 };
 
 #endif /* GAMESCENE_H_ */
