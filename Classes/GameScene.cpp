@@ -60,36 +60,45 @@ bool GameLayer::init() {
 		setPosition(ccp(s.width / 2, s.height / 2));
 
 		/*-- 计分 --*/
-		CCLabelTTF *score = CCLabelTTF::create(CCString::createWithFormat("%d", LOCAL_CONTEXT->getScore())->getCString(),LOCAL_RESOURCES->valueByKey("font")->getCString(),LOCAL_RESOURCES->valueByKey("font_size")->floatValue());
+		CCLabelTTF *score =
+				CCLabelTTF::create(
+						CCString::createWithFormat("%d",
+								LOCAL_CONTEXT->getScore())->getCString(),
+						LOCAL_RESOURCES->valueByKey("font")->getCString(),
+						LOCAL_RESOURCES->valueByKey("font_size")->floatValue());
 		score->setColor(LOCAL_CONTEXT->getFontColor());
 		score->setAnchorPoint(ccp(1, 1));
 		score->setPosition(ccpp(0.5,0.5));
-		this->addChild(score,0,TAG_SCORE);
+		this->addChild(score, 0, TAG_SCORE);
 
-		CCPoint ltp=ccpp(-0.5,0.5);
-		CCPoint lbp=ccpp(-0.5,-0.5);
-		CCPoint rtp=ccpp(0.5,0.5);
-		CCPoint rbp=ccpp(0.5,-0.5);
+		CCPoint ltp = ccpp(-0.5,0.5);
+		CCPoint lbp = ccpp(-0.5,-0.5);
+		CCPoint rtp = ccpp(0.5,0.5);
+		CCPoint rbp = ccpp(0.5,-0.5);
 //
 		b2BodyDef leftBodyDef;
 		leftBodyDef.position.Set(0, 0);
 		leftBodyDef.type = b2_staticBody;
 		this->leftBody = PhyWorld::shareWorld()->CreateBody(&leftBodyDef);
 		b2EdgeShape leftShape;
-		leftShape.Set(b2Vec2(c2p(ltp.x), c2p(ltp.y)), b2Vec2(c2p(lbp.x), c2p(lbp.y)));
+		leftShape.Set(b2Vec2(c2p(ltp.x), c2p(ltp.y)),
+				b2Vec2(c2p(lbp.x), c2p(lbp.y)));
 		leftBody->CreateFixture(&leftShape, 0.0f);
+		//leftBody->SetLinearDamping(0.0f);
 
 		b2BodyDef rightBodyDef;
 		rightBodyDef.position.Set(0, 0);
 		this->rightBody = PhyWorld::shareWorld()->CreateBody(&rightBodyDef);
 		b2EdgeShape rightShape;
-		rightShape.Set(b2Vec2(c2p(rtp.x), c2p(rtp.y)), b2Vec2(c2p(rbp.x), c2p(rbp.y)));
+		rightShape.Set(b2Vec2(c2p(rtp.x), c2p(rtp.y)),
+				b2Vec2(c2p(rbp.x), c2p(rbp.y)));
 		rightBody->CreateFixture(&rightShape, 0.0f);
+		//rightBody->SetLinearDamping(0.0f);
 
 		Mushroom *mushroom = Mushroom::create();
 		mushroom->setPosition(ccpp(-0.2,0.5));
 		PhySprite::initPhySprite(*mushroom);
-		this->addChild(mushroom,10,TAG_MUSHROOM);
+		this->addChild(mushroom, 10, TAG_MUSHROOM);
 
 		this->brickEmitter->initBricks();
 
@@ -97,15 +106,15 @@ bool GameLayer::init() {
 		CCSprite *leftBtn = CCSprite::create("btn_left.png");
 		leftBtn->setAnchorPoint(ccp(0.5,0.5));
 		leftBtn->setPosition(ccpp(-0.35,-0.2));
-		this->addChild(leftBtn,9,TAG_BTN_LEFT);
+		this->addChild(leftBtn, 9, TAG_BTN_LEFT);
 		CCSprite *rightBtn = CCSprite::create("btn_right.png");
 		rightBtn->setAnchorPoint(ccp(0.5,0.5));
 		rightBtn->setPosition(ccpp(-0.1,-0.2));
-		this->addChild(rightBtn,9,TAG_BTN_RIGHT);
+		this->addChild(rightBtn, 9, TAG_BTN_RIGHT);
 		CCSprite *jumpBtn = CCSprite::create("btn_jump.png");
 		jumpBtn->setAnchorPoint(ccp(0.5,0.5));
 		jumpBtn->setPosition(ccpp(0.35,-0.2));
-		this->addChild(jumpBtn,9,TAG_BTN_JUMP);
+		this->addChild(jumpBtn, 9, TAG_BTN_JUMP);
 		draw();
 		return true;
 
@@ -115,32 +124,64 @@ bool GameLayer::init() {
 }
 
 void GameLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent) {
-	CCLog("ccTouchesBegan %d",pTouches->count());
-	Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
-	for (CCSetIterator it = pTouches->begin(); it != pTouches->end(); it++) {
-		CCTouch* touch = (CCTouch*) *it;
-		CCPoint point = touch->getLocationInView();
-		if (this->getChildByTag(TAG_BTN_RIGHT)->boundingBox().containsPoint(
-				point)) {
-			CCLog("forward");
-			mushroom->setVec(vec_forward);
-		} else if (this->getChildByTag(TAG_BTN_LEFT)->boundingBox().containsPoint(
-				point)) {
-			CCLog("back");
-			mushroom->setVec(vec_back);
-		} else if (this->getChildByTag(TAG_BTN_JUMP)->boundingBox().containsPoint(
-				point)) {
-			CCLog("jump");
-			mushroom->jump();
+	if (running) {
+		Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
+		for (CCSetIterator it = pTouches->begin(); it != pTouches->end();
+				it++) {
+			CCTouch* touch = (CCTouch*) *it;
+			CCPoint point =
+					touch->getLocation() - ccp(LOCAL_RESOLUTION.width / 2, LOCAL_RESOLUTION.height / 2);
+			if (this->getChildByTag(TAG_BTN_RIGHT)->boundingBox().containsPoint(
+					point)) {
+				mushroom->setVec(vec_forward);
+			} else if (this->getChildByTag(TAG_BTN_LEFT)->boundingBox().containsPoint(
+					point)) {
+				mushroom->setVec(vec_back);
+			} else if (this->getChildByTag(TAG_BTN_JUMP)->boundingBox().containsPoint(
+					point)) {
+				mushroom->jump();
+			}
 		}
 	}
 }
-void GameLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent) {
 
+void GameLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent) {
+	if (running) {
+		Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
+		for (CCSetIterator it = pTouches->begin(); it != pTouches->end();
+				it++) {
+			CCTouch* touch = (CCTouch*) *it;
+			CCPoint point =
+					touch->getLocation() - ccp(LOCAL_RESOLUTION.width / 2, LOCAL_RESOLUTION.height / 2);
+			CCPoint startPoint =
+					touch->getStartLocation() - ccp(LOCAL_RESOLUTION.width / 2, LOCAL_RESOLUTION.height / 2);
+			if (!this->getChildByTag(TAG_BTN_JUMP)->boundingBox().containsPoint(
+					startPoint)) {
+				if (this->getChildByTag(TAG_BTN_RIGHT)->boundingBox().containsPoint(
+						point) && !mushroom->isVec(vec_forward)) {
+					mushroom->setVec(vec_forward);
+				} else if (this->getChildByTag(TAG_BTN_LEFT)->boundingBox().containsPoint(
+						point) && !mushroom->isVec(vec_back)) {
+					mushroom->setVec(vec_back);
+				}
+			}
+		}
+	}
 }
 void GameLayer::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent) {
-	Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
-	mushroom->setVec(vec_stop);
+	if (running) {
+		Mushroom *mushroom = (Mushroom*) this->getChildByTag(TAG_MUSHROOM);
+		for (CCSetIterator it = pTouches->begin(); it != pTouches->end();
+				it++) {
+			CCTouch* touch = (CCTouch*) *it;
+			CCPoint startPoint =
+					touch->getStartLocation() - ccp(LOCAL_RESOLUTION.width / 2, LOCAL_RESOLUTION.height / 2);
+			if (!this->getChildByTag(TAG_BTN_JUMP)->boundingBox().containsPoint(
+					startPoint)) {
+				mushroom->setVec(vec_stop);
+			}
+		}
+	}
 }
 
 CCScene * GameLayer::scene() {
@@ -171,7 +212,7 @@ void GameLayer::onPauseItem(CCObject *object) {
 
 void GameLayer::resume() {
 	CCDirector::sharedDirector()->getRunningScene()->removeChildByTag(
-	TAG_LAYER_PAUSE);
+			TAG_LAYER_PAUSE);
 	enable();
 }
 
@@ -200,9 +241,8 @@ CCLayer * GameLayer::createPauseButtonLayer() {
 	pausebg->setTarget(this, menu_selector(GameLayer::onPauseItem));
 	pausebg->setAnchorPoint(ccp(0, 1));
 	pausebg->setPosition(ccpp(-0.49, 0.49));
-	pausetxt->setPosition(
-			ccp(pausebg->getContentSize().width / 2,
-					pausebg->getContentSize().height / 2));
+	pausetxt->setPosition(ccp(pausebg->getContentSize().width / 2,
+			pausebg->getContentSize().height / 2));
 	pausetxt->setAnchorPoint(ccp(0.5, 0.5));
 	pausebg->addChild(pausetxt);
 	layer->addChild(pausebg);
@@ -222,12 +262,12 @@ void GameLayer::createPauseLayer() {
 	CCMenuItemImage *resumebg = CCMenuItemImage::create(("btn_big.png"),
 			("btn_big.png"));
 	resumebg->setTarget(this, menu_selector(GameLayer::onResumeItem));
-	CCMenuItemFont *resumetxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_resume")->getCString());
+	CCMenuItemFont *resumetxt = CCMenuItemFont::create(
+			LOCAL_RESOURCES->valueByKey("i18n_resume")->getCString());
 	resumebg->setAnchorPoint(ccp(0.5, 0.5));
 	resumebg->setPosition(ccpp(0, 0));
-	resumetxt->setPosition(
-			ccp(resumebg->getContentSize().width / 2,
-					resumebg->getContentSize().height / 2));
+	resumetxt->setPosition(ccp(resumebg->getContentSize().width / 2,
+			resumebg->getContentSize().height / 2));
 	resumetxt->setAnchorPoint(ccp(0.5, 0.5));
 	resumetxt->setColor(context->getFontColor());
 	resumebg->addChild(resumetxt);
@@ -237,12 +277,12 @@ void GameLayer::createPauseLayer() {
 	CCMenuItemImage *backbg = CCMenuItemImage::create(("btn_big.png"),
 			("btn_big.png"));
 	backbg->setTarget(this, menu_selector(GameLayer::onBackItem));
-	CCMenuItemFont *backtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_back")->getCString());
+	CCMenuItemFont *backtxt = CCMenuItemFont::create(
+			LOCAL_RESOURCES->valueByKey("i18n_back")->getCString());
 	backbg->setAnchorPoint(ccp(0.5, 0.5));
 	backbg->setPosition(ccpp(0, -0.12));
-	backtxt->setPosition(
-			ccp(backbg->getContentSize().width / 2,
-					backbg->getContentSize().height / 2));
+	backtxt->setPosition(ccp(backbg->getContentSize().width / 2,
+			backbg->getContentSize().height / 2));
 	backtxt->setAnchorPoint(ccp(0.5, 0.5));
 	backtxt->setColor(context->getFontColor());
 	backbg->addChild(backtxt);
@@ -250,20 +290,23 @@ void GameLayer::createPauseLayer() {
 
 	pauseLayer->addChild(menu);
 	CCDirector::sharedDirector()->getRunningScene()->addChild(pauseLayer, 0,
-	TAG_LAYER_PAUSE);
+			TAG_LAYER_PAUSE);
 }
 
 void GameLayer::disable() {
 	this->running = false;
+	this->brickEmitter->pause();
 }
 
 void GameLayer::enable() {
 	this->running = true;
+	this->brickEmitter->resume();
 }
 
 void GameLayer::gameover() {
 	LOCAL_CONTEXT->save();
-	CCDirector::sharedDirector()->replaceScene(CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
+	CCDirector::sharedDirector()->replaceScene(
+			CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
 }
 
 void GameLayer::update(float delta) {

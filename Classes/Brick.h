@@ -50,6 +50,8 @@ public:
 
 	friend class BrickEmitter;
 
+	virtual PHY_TYPE getPhyType();
+
 protected:
 	virtual void createPhyBody();
 
@@ -60,9 +62,15 @@ private:
 
 	BrickEmitter *emitter;
 
+	b2Vec2 linearVelocity;
+
 	BrickStatus status;
 
 	void updateStatus();
+
+	void pause();
+
+	void resume();
 };
 
 /*--------- Class BatchBrick --------*/
@@ -77,7 +85,13 @@ public:
 
 	Bricks * emitBrick(Bricks *lastBrick);
 
+	void pause();
+
+	void resume();
+
 private:
+	Bricks *lastBricks;
+
 	CCLayer &targetLayer;
 
 	Bricks* emitBrick(int num, Bricks* lastBrick);

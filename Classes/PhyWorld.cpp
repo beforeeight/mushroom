@@ -6,7 +6,7 @@
  */
 
 #include "PhyWorld.h"
-
+#include "MushroomContactListener.h"
 #include <Box2D/Box2D.h>
 #include "GLES-Render.h"
 
@@ -29,6 +29,8 @@ b2World* PhyWorld::shareWorld(void) {
 		//gravity->Set(0.0f, -10.0f);
 		world = new b2World(gravity);
 		world->SetAllowSleeping(true);
+		world->SetContactListener(new MushroomContactListener());
+
 		world->SetContinuousPhysics(true);
 
 //		b2DebugDraw

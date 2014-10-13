@@ -24,14 +24,16 @@ BrickEmitter::~BrickEmitter() {
 void BrickEmitter::initBricks() {
 	int num = 30;
 	Bricks* newBricks = Bricks::create(num);
+	lastBricks = newBricks;
 	newBricks->emitter = this;
-	newBricks->setPosition(ccpp(-0.5, 0));
+	newBricks->setPosition(ccpp(-0.5, 0) + ccp(0,POS_JUNCTION-BRICK_HEIGHT/2));
 	PhySprite::initPhySprite(*newBricks);
 	this->targetLayer.addChild(newBricks);
 }
 
 Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
 	Bricks* newBricks = Bricks::create(num);
+	lastBricks = newBricks;
 	newBricks->emitter = this;
 	if (lastBrick) {
 		newBricks->previous = lastBrick;
@@ -57,6 +59,17 @@ Bricks * BrickEmitter::emitBrick(Bricks *lastBrick) {
 	return newBricks;
 }
 
+void BrickEmitter::pause() {
+	if (lastBricks) {
+		lastBricks->pause();
+	}
+}
+
+void BrickEmitter::resume() {
+	if (lastBricks) {
+		lastBricks->resume();
+	}
+}
 /*------------ Single Brick ----------*/
 
 Brick::Brick() {
@@ -69,7 +82,7 @@ Brick::~Brick() {
 bool Brick::init() {
 	if (CCSprite::initWithTexture(
 			CCTextureCache::sharedTextureCache()->textureForKey(
-			TEXTURE_BRICK))) {
+					TEXTURE_BRICK))) {
 		this->setAnchorPoint(ccp(0.5, 0.5));
 		return true;
 	} else {
@@ -83,6 +96,12 @@ Bricks::Bricks() :
 }
 
 Bricks::~Bricks() {
+	if (previous) {
+		previous->next = 0;
+	}
+	if (next) {
+		next->previous = 0;
+	}
 }
 
 bool Bricks::init(int num) {
@@ -94,15 +113,15 @@ bool Bricks::init(int num) {
 			this->addChild(b);
 		}
 		this->setAnchorPoint(ccp(0.5, 0.5));
-		CCLog("w,h = %f,%f", BRICK_WIDTH*num,BRICK_HEIGHT);
-		CCLog("w,h = %f,%f",
-				CCDirector::sharedDirector()->getOpenGLView()->getFrameSize().width,
-				CCDirector::sharedDirector()->getOpenGLView()->getVisibleSize().width);
 		this->setContentSize(CCSizeMake(BRICK_WIDTH*num, BRICK_HEIGHT));
 		return true;
 	} else {
 		return false;
 	}
+}
+
+PHY_TYPE Bricks::getPhyType() {
+	return BRICK;
 }
 
 Bricks* Bricks::create(int num) {
@@ -120,26 +139,27 @@ Bricks* Bricks::create(int num) {
 void Bricks::createPhyBody() {
 	b2BodyDef b2BodyDef;
 	b2BodyDef.type = b2_kinematicBody;
+	b2BodyDef.bullet = true;
 	b2BodyDef.position = b2Vec2(c2p(this->getPosition().x),
-			c2p(this->getPosition().y));
+	c2p(this->getPosition().y));
 	b2body = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
 
-	b2PolygonShape b2CircleShape;
-	b2CircleShape.SetAsBox(c2p(this->getContentSize().width / 2),
-			c2p(this->getContentSize().height / 2));
+	b2PolygonShape b2box;
+	b2box.SetAsBox(c2p(this->getContentSize().width / 2),
+	c2p(this->getContentSize().height / 2));
 
 // Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &b2CircleShape;
+	fixtureDef.shape = &b2box;
 // Add the shape to the body.
 	b2body->CreateFixture(&fixtureDef);
-	b2body->SetLinearDamping(0.0f);
+	//b2body->SetLinearDamping(0.0f);
 	b2body->SetUserData(this);
 }
 
 void Bricks::initPhyBody() {
 	if (b2body) {
-		b2body->SetLinearVelocity(b2Vec2(-1, 0));
+		b2body->SetLinearVelocity(b2Vec2(-2, 0));
 	}
 }
 void Bricks::update(float delta) {
@@ -163,8 +183,22 @@ void Bricks::updateStatus() {
 
 	if ((this->status == brick_running || this->status == brick_ready)
 			&& p.x < ccpp(-0.5, -1).x) {
-				this->status = brick_over;
-				return;
-			}
-		}
+		this->status = brick_over;
+		return;
+	}
+}
 
+void Bricks::pause() {
+	linearVelocity = this->b2body->GetLinearVelocity();
+	this->b2body->SetLinearVelocity(b2Vec2_zero);
+	if (previous) {
+		previous->pause();
+	}
+}
+
+void Bricks::resume() {
+	this->b2body->SetLinearVelocity(linearVelocity);
+	if (previous) {
+		previous->resume();
+	}
+}

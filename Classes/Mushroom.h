@@ -14,7 +14,11 @@ enum MushroomVec {
 	vec_forward, vec_back, vec_stop
 };
 class Mushroom: public PhySprite {
+
+	MushroomVec vec;
+
 public:
+
 	Mushroom();
 
 	virtual ~Mushroom();
@@ -27,10 +31,18 @@ public:
 
 	void setVec(MushroomVec vec);
 
+	bool isVec(MushroomVec vec);
+
 	void jump();
 
+	virtual PHY_TYPE getPhyType();
+
+	virtual void beginContact(PhySprite *other, b2Contact* contact);
+
+	virtual void endContact(PhySprite *other, b2Contact* contact);
+
 protected:
-	MushroomVec vec;
+	bool jumping, dying;
 
 	void forward();
 
@@ -39,6 +51,7 @@ protected:
 	void stop();
 
 	virtual void createPhyBody();
+
 };
 
 #endif /* MUSHROOM_H_ */

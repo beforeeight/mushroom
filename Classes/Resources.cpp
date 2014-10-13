@@ -12,7 +12,7 @@ using namespace std;
 using namespace CocosDenshion;
 
 const Resource iphone5Resource = { cocos2d::CCSizeMake(640, 1136), "iphone" };
-const Resource iphone4Resource = { cocos2d::CCSizeMake(640, 960), "ipad" };
+const Resource iphone4Resource = { cocos2d::CCSizeMake(640, 960), "iphone" };
 
 #define ASPECT_RATIO_4_5 (640.0f/960.f+640.0f/1136.0f)/2
 
@@ -160,7 +160,7 @@ void LocalResources::loadResources() {
 	CCTextureCache::sharedTextureCache()->addImage(("mushroom.png"));
 
 	/*-- 声音 --*/
-	SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("bgm.mp3");
+	//SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("bgm.mp3");
 	//SimpleAudioEngine::sharedEngine()->preloadEffect("jump.mp3");
 	/*-- 动画 --*/
 
@@ -168,14 +168,14 @@ void LocalResources::loadResources() {
 
 void LocalResources::playBgMusic() {
 	if (LOCAL_CONTEXT->isSound()
-	&& !SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying()) {
-		SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
+			&& !SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying()) {
+		//SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
 	}
 }
 
 void LocalResources::playEffect(const char * mp3) {
 	if (LOCAL_CONTEXT->isSound()) {
-		SimpleAudioEngine::sharedEngine()->playEffect(mp3);
+		//SimpleAudioEngine::sharedEngine()->playEffect(mp3);
 	}
 }
 
@@ -214,19 +214,21 @@ bool Context::isSound() const {
 }
 
 void Context::onSound() {
-	SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
 	this->sound = true;
+	//SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
 	save();
 }
 
 void Context::offSound() {
-	SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
 	this->sound = false;
+	//SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
 	save();
 }
 
 ccColor3B Context::getFontColor() const {
-	return ccc3(LOCAL_RESOURCES->valueByKey("font_color_r")->intValue(),LOCAL_RESOURCES->valueByKey("font_color_g")->intValue(),LOCAL_RESOURCES->valueByKey("font_color_b")->intValue());
+	return ccc3(LOCAL_RESOURCES->valueByKey("font_color_r")->intValue(),
+			LOCAL_RESOURCES->valueByKey("font_color_g")->intValue(),
+			LOCAL_RESOURCES->valueByKey("font_color_b")->intValue());
 }
 
 unsigned int Context::increaseScore() {

@@ -10,7 +10,6 @@
 #include <Box2D/Box2D.h>
 #include "Resources.h"
 
-#define PHYSICAL_WIDTH 20
 
 class PhyWorld {
 public:
