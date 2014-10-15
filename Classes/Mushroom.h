@@ -16,6 +16,7 @@ enum MushroomVec {
 class Mushroom: public PhySprite {
 
 	MushroomVec vec;
+	void gameover();
 
 public:
 
@@ -42,7 +43,7 @@ public:
 	virtual void endContact(PhySprite *other, b2Contact* contact);
 
 protected:
-	bool jumping, dying;
+	bool jumping, dying, inwater;
 
 	void forward();
 

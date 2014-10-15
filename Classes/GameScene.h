@@ -25,16 +25,16 @@ public:
 
 	virtual void draw(void);
 
-    virtual void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
-    virtual void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
-    virtual void ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent);
+	virtual void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
+	virtual void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
+	virtual void ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent);
 
 private:
 	bool running;
 
 	BrickEmitter *brickEmitter;
 
-	b2Body *leftBody, *rightBody;
+	b2Body *leftEdge, *rightEdge;
 
 	void onPauseItem(CCObject *object);
 
@@ -58,6 +58,7 @@ private:
 
 	virtual void update(float delta);
 
+	void increateScore(CCObject *p_sender, unsigned int score);
 };
 
 #endif /* GAMESCENE_H_ */

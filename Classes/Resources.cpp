@@ -182,6 +182,8 @@ void LocalResources::playEffect(const char * mp3) {
 Context::Context() :
 		score(0), newrecord(false) {
 	load();
+	scoreTarget = 0;
+	scoreFunc = 0;
 }
 
 Context::~Context() {
@@ -232,10 +234,17 @@ ccColor3B Context::getFontColor() const {
 }
 
 unsigned int Context::increaseScore() {
-	score++;
+	return increaseScore(1);
+}
+
+unsigned int Context::increaseScore(unsigned int delta) {
+	score += delta;
 	if (score > highScore) {
 		highScore = score;
 		newrecord = true;
+	}
+	if (scoreTarget && scoreFunc) {
+		(scoreTarget->*scoreFunc)(scoreTarget, score);
 	}
 	return this->score;
 }
@@ -255,4 +264,10 @@ unsigned int Context::getHighScore() const {
 
 bool Context::isNewRecord() const {
 	return this->newrecord;
+}
+
+void Context::setScoreTarget(CCObject *target,
+		void (CCObject::*func)(CCObject*, unsigned int)) {
+	this->scoreTarget = target;
+	this->scoreFunc = func;
 }

@@ -22,63 +22,66 @@ FinishLayer::~FinishLayer() {
 
 bool FinishLayer::init() {
 	if (CCMenu::init()) {
+
 		/*-- 文字 --*/
-		CCMenuItemImage *gameover = CCMenuItemImage::create("gameover.png",
-				"gameover.png");
+		CCNode *gameoverSprite = CCLabelBMFont::create(
+				LOCAL_RESOURCES->valueByKey("i18n_gameover")->getCString(),
+				"fonts.fnt");
+		CCMenuItemSprite *gameover = CCMenuItemSprite::create(gameoverSprite,
+				gameoverSprite, gameoverSprite);
 		gameover->setAnchorPoint(ccp(0.5, 0.5));
 		gameover->setPosition(ccpp(0, 0.32));
 		this->addChild(gameover);
 
-		CCMenuItemImage *resultbg = CCMenuItemImage::create("result_bg.png",
-				"result_bg.png");
-		resultbg->setAnchorPoint(ccp(0.5, 0.5));
-		resultbg->setPosition(ccpp(0, 0.146));
-		this->addChild(resultbg);
-
-		CCMenuItemFont *scoreLabel = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_score")->getCString());
+		CCMenuItemFont *scoreLabel = CCMenuItemFont::create(
+				LOCAL_RESOURCES->valueByKey("i18n_score")->getCString());
 		scoreLabel->setColor(LOCAL_CONTEXT->getFontColor());
 		scoreLabel->setAnchorPoint(ccp(0, 0.5));
-		scoreLabel->setPosition(
-				ccp(resultbg->getContentSize().width * 0.1,
-						resultbg->getContentSize().height * 0.75));
-		CCMenuItemFont *score = CCMenuItemFont::create(
-				CCString::createWithFormat("%d", LOCAL_CONTEXT->getScore())->getCString());
+
+		CCMenuItemFont *score =
+				CCMenuItemFont::create(
+						CCString::createWithFormat("%d",
+								LOCAL_CONTEXT->getScore())->getCString());
 		score->setColor(LOCAL_CONTEXT->getFontColor());
 		score->setAnchorPoint(ccp(0, 0.5));
-		score->setPosition(
-				ccp(resultbg->getContentSize().width * 0.55,
-						resultbg->getContentSize().height * 0.75));
 
-		CCMenuItemFont *highScoreLabel = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_highscore")->getCString());
+		CCMenuItemFont *highScoreLabel = CCMenuItemFont::create(
+				LOCAL_RESOURCES->valueByKey("i18n_highscore")->getCString());
 		highScoreLabel->setColor(LOCAL_CONTEXT->getFontColor());
 		highScoreLabel->setAnchorPoint(ccp(0, 0.5));
-		highScoreLabel->setPosition(
-				ccp(resultbg->getContentSize().width * 0.1,
-						resultbg->getContentSize().height * 0.25));
-		CCMenuItemFont *highScore = CCMenuItemFont::create(
-				CCString::createWithFormat("%d", LOCAL_CONTEXT->getHighScore())->getCString());
+
+		CCMenuItemFont *highScore =
+				CCMenuItemFont::create(
+						CCString::createWithFormat("%d",
+								LOCAL_CONTEXT->getHighScore())->getCString());
 		highScore->setColor(LOCAL_CONTEXT->getFontColor());
 		highScore->setAnchorPoint(ccp(0, 0.5));
-		highScore->setPosition(
-				ccp(resultbg->getContentSize().width * 0.55,
-						resultbg->getContentSize().height * 0.25));
-		resultbg->addChild(scoreLabel);
-		resultbg->addChild(highScoreLabel);
-		resultbg->addChild(score);
-		resultbg->addChild(highScore);
 
-		if (LOCAL_CONTEXT->isNewRecord()) {
-			CCMenuItemImage *newrecord = CCMenuItemImage::create("newrecord.png","newrecord.png");
-			newrecord->setAnchorPoint(ccp(0, 0.5));
-			newrecord->setPosition(score->getPosition()+ccp(score->getContentSize().width,0)+ ccpp(0.1,0));
-			resultbg->addChild(newrecord);
-		}
+		scoreLabel->setPosition(ccpp(-0.3, 0.2));
+		score->setPosition(ccpp(0.15,0.2));
+		highScoreLabel->setPosition(ccpp(-0.3,0.1));
+		highScore->setPosition(ccpp(0.15,0.1));
+		this->addChild(scoreLabel);
+		this->addChild(highScoreLabel);
+		this->addChild(score);
+		this->addChild(highScore);
 
-		//再来一次
+//		if (LOCAL_CONTEXT->isNewRecord()) {
+//			CCMenuItemImage *newrecord = CCMenuItemImage::create(
+//					"newrecord.png", "newrecord.png");
+//			newrecord->setAnchorPoint(ccp(0, 0.5));
+//			newrecord->setPosition(
+//					score->getPosition()+ccp(score->getContentSize().width,0)+ ccpp(0.1,0));
+//			this->addChild(newrecord);
+//		}
+
+//再来一次
 		CCMenuItemImage *againbg = CCMenuItemImage::create(("btn_big.png"),
 				("btn_big.png"));
 		againbg->setTarget(againbg, menu_selector(FinishLayer::onAgainItem));
-		CCNode *againtxt = CCLabelBMFont::create(LOCAL_RESOURCES->valueByKey("i18n_again")->getCString(),"fonts.fnt");
+		CCNode *againtxt = CCLabelBMFont::create(
+				LOCAL_RESOURCES->valueByKey("i18n_again")->getCString(),
+				"fonts.fnt");
 		//CCMenuItemFont *againtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_again")->getCString());
 		againbg->setAnchorPoint(ccp(0.5, 0.5));
 		againbg->setPosition(ccpp(0, -0.07));
@@ -94,7 +97,9 @@ bool FinishLayer::init() {
 		CCMenuItemImage *sharebg = CCMenuItemImage::create(("btn_big.png"),
 				("btn_big.png"));
 		sharebg->setTarget(sharebg, menu_selector(FinishLayer::onShareItem));
-		CCNode *sharetxt = CCLabelBMFont::create(LOCAL_RESOURCES->valueByKey("i18n_share")->getCString(),"fonts.fnt");
+		CCNode *sharetxt = CCLabelBMFont::create(
+				LOCAL_RESOURCES->valueByKey("i18n_share")->getCString(),
+				"fonts.fnt");
 		//CCMenuItemFont *sharetxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_share")->getCString());
 		sharebg->setAnchorPoint(ccp(0.5, 0.5));
 		sharebg->setPosition(ccpp(0, -0.19));
@@ -110,7 +115,9 @@ bool FinishLayer::init() {
 		CCMenuItemImage *backbg = CCMenuItemImage::create(("btn_big.png"),
 				("btn_big.png"));
 		backbg->setTarget(this, menu_selector(FinishLayer::onBackItem));
-		CCNode *backtxt = CCLabelBMFont::create(LOCAL_RESOURCES->valueByKey("i18n_back")->getCString(),"fonts.fnt");
+		CCNode *backtxt = CCLabelBMFont::create(
+				LOCAL_RESOURCES->valueByKey("i18n_back")->getCString(),
+				"fonts.fnt");
 		//CCMenuItemFont *backtxt = CCMenuItemFont::create(LOCAL_RESOURCES->valueByKey("i18n_back")->getCString());
 		backbg->setAnchorPoint(ccp(0.5, 0.5));
 		backbg->setPosition(ccpp(0, -0.31));

@@ -24,15 +24,24 @@ BrickEmitter::~BrickEmitter() {
 void BrickEmitter::initBricks() {
 	int num = 30;
 	Bricks* newBricks = Bricks::create(num);
+	newBricks->score = 0;
 	lastBricks = newBricks;
 	newBricks->emitter = this;
-	newBricks->setPosition(ccpp(-0.5, 0) + ccp(0,POS_JUNCTION-BRICK_HEIGHT/2));
+	newBricks->setPosition(
+			ccpp(-0.5, 0) + ccp(0, POS_JUNCTION - BRICK_HEIGHT / 2));
 	PhySprite::initPhySprite(*newBricks);
 	this->targetLayer.addChild(newBricks);
+	//this->emitBrick(newBricks);
 }
 
 Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
-	Bricks* newBricks = Bricks::create(num);
+	Bricks* newBricks;
+	if (rand() % 2 == 0) {
+		newBricks = HorizontalBricks::create(num);
+	} else {
+		newBricks = Bricks::create(num);
+	}
+
 	lastBricks = newBricks;
 	newBricks->emitter = this;
 	if (lastBrick) {
@@ -47,14 +56,16 @@ Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
 }
 
 CCPoint BrickEmitter::computeSpan(Bricks* lastBrick, Bricks* newBricks) {
-	int num = rand() % 3 + 2;
-	CCPoint pos =
-			lastBrick->getPosition() + ccp(lastBrick->getContentSize().width/2, 0) + ccp(newBricks->getContentSize().width/2, 0)+ccp(BRICK_WIDTH*num,0);
+	int num = rand() % 2 + 4;
+	CCPoint pos = lastBrick->getPosition()
+			+ ccp(lastBrick->getContentSize().width / 2, 0)
+			+ ccp(newBricks->getContentSize().width / 2, 0)
+			+ ccp(BRICK_WIDTH * num, 0);
 	return pos;
 }
 
 Bricks * BrickEmitter::emitBrick(Bricks *lastBrick) {
-	int num = rand() % 5 + 5;
+	int num = rand() % 3 + 5;
 	Bricks* newBricks = emitBrick(num, lastBrick);
 	return newBricks;
 }
@@ -92,7 +103,7 @@ bool Brick::init() {
 
 /*------------ Group Brick with b2Body ----------*/
 Bricks::Bricks() :
-		previous(0), next(0), emitter(0), status(brick_ready) {
+		score(1), previous(0), next(0), emitter(0), status(brick_ready) {
 }
 
 Bricks::~Bricks() {
@@ -113,7 +124,7 @@ bool Bricks::init(int num) {
 			this->addChild(b);
 		}
 		this->setAnchorPoint(ccp(0.5, 0.5));
-		this->setContentSize(CCSizeMake(BRICK_WIDTH*num, BRICK_HEIGHT));
+		this->setContentSize(CCSizeMake(BRICK_WIDTH * num, BRICK_HEIGHT));
 		return true;
 	} else {
 		return false;
@@ -122,6 +133,20 @@ bool Bricks::init(int num) {
 
 PHY_TYPE Bricks::getPhyType() {
 	return BRICK;
+}
+
+void Bricks::beginContact(PhySprite *other, b2Contact* contact) {
+	if (other->getPhyType() == MUSHROOM && this->score > 0) {
+		b2Manifold *manifold = contact->GetManifold();
+		b2ManifoldPoint mp1 = manifold->points[0];
+		b2ManifoldPoint mp2 = manifold->points[1];
+		if (mp1.localPoint.y == mp2.localPoint.y) { //底边碰撞
+			if (this->getPositionY() < other->getPositionY()) { //蘑菇在上边
+				LOCAL_CONTEXT->increaseScore(score);
+				score = 0;
+			}
+		}
+	}
 }
 
 Bricks* Bricks::create(int num) {
@@ -139,10 +164,9 @@ Bricks* Bricks::create(int num) {
 void Bricks::createPhyBody() {
 	b2BodyDef b2BodyDef;
 	b2BodyDef.type = b2_kinematicBody;
-	b2BodyDef.bullet = true;
 	b2BodyDef.position = b2Vec2(c2p(this->getPosition().x),
 	c2p(this->getPosition().y));
-	b2body = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
+	b2PhyBody = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
 
 	b2PolygonShape b2box;
 	b2box.SetAsBox(c2p(this->getContentSize().width / 2),
@@ -152,14 +176,13 @@ void Bricks::createPhyBody() {
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2box;
 // Add the shape to the body.
-	b2body->CreateFixture(&fixtureDef);
-	//b2body->SetLinearDamping(0.0f);
-	b2body->SetUserData(this);
+	b2PhyBody->CreateFixture(&fixtureDef);
+	b2PhyBody->SetUserData(this);
 }
 
 void Bricks::initPhyBody() {
-	if (b2body) {
-		b2body->SetLinearVelocity(b2Vec2(-2, 0));
+	if (b2PhyBody) {
+		b2PhyBody->SetLinearVelocity(b2Vec2(-2, 0));
 	}
 }
 void Bricks::update(float delta) {
@@ -173,32 +196,83 @@ void Bricks::update(float delta) {
 }
 
 void Bricks::updateStatus() {
-	CCPoint p = this->getPosition() + ccp(this->getContentSize().width / 2, 0);
-
-	if (this->status == brick_ready && p.x < ccpp(0.5, 0).x) {
+	CCPoint head = this->getPosition()
+			- ccp(this->getContentSize().width / 2, 0);
+	CCPoint tail = this->getPosition()
+			+ ccp(this->getContentSize().width / 2, 0);
+	if (this->status == brick_ready && head.x < ccpp(0.5, 0).x) {
 		this->emitter->emitBrick(this);
 		this->status = brick_running;
 		return;
 	}
 
 	if ((this->status == brick_running || this->status == brick_ready)
-			&& p.x < ccpp(-0.5, -1).x) {
+			&& tail.x < ccpp(-0.5, -1).x) {
 		this->status = brick_over;
 		return;
 	}
 }
 
 void Bricks::pause() {
-	linearVelocity = this->b2body->GetLinearVelocity();
-	this->b2body->SetLinearVelocity(b2Vec2_zero);
+	linearVelocity = this->b2PhyBody->GetLinearVelocity();
+	this->b2PhyBody->SetLinearVelocity(b2Vec2_zero);
 	if (previous) {
 		previous->pause();
 	}
 }
 
 void Bricks::resume() {
-	this->b2body->SetLinearVelocity(linearVelocity);
+	this->b2PhyBody->SetLinearVelocity(linearVelocity);
 	if (previous) {
 		previous->resume();
+	}
+}
+
+HorizontalBricks::HorizontalBricks() {
+	score = 2;
+}
+
+HorizontalBricks::~HorizontalBricks() {
+}
+
+HorizontalBricks* HorizontalBricks::create(int num) {
+	HorizontalBricks *pRet = new HorizontalBricks();
+	if (pRet && pRet->init(num)) {
+		pRet->autorelease();
+		return pRet;
+	} else {
+		delete pRet;
+		pRet = NULL;
+		return NULL;
+	}
+}
+
+void HorizontalBricks::update(float delta) {
+	Bricks::update(delta);
+	if (this->previous) {
+		float x1 = previous->getPositionX()
+				+ previous->getContentSize().width / 2;
+		float x2 = this->getPositionX() - this->getContentSize().width / 2;
+		if (x1 >= x2) {
+			b2Vec2 speed = b2PhyBody->GetLinearVelocity();
+			speed.x = abs(speed.x);
+			b2PhyBody->SetLinearVelocity(speed);
+		}
+	}
+	if (this->next) {
+		float x1 = this->getPositionX() + this->getContentSize().width / 2;
+		float x2 = next->getPositionX() - next->getContentSize().width / 2;
+		if (x1 >= x2) {
+			b2Vec2 speed = b2PhyBody->GetLinearVelocity();
+			speed.x = -abs(speed.x);
+			b2PhyBody->SetLinearVelocity(speed);
+		}
+	}
+
+}
+
+void HorizontalBricks::initPhyBody() {
+	if (b2PhyBody) {
+		b2PhyBody->SetLinearVelocity(b2Vec2(-5, 0));
 	}
 }

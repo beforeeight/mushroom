@@ -31,5 +31,8 @@
         
         <key>i18n_share</key>
         <string>Share</string>
+        
+        <key>i18n_gameover</key>
+        <string>Game Over</string>
     </dict>
 </plist>

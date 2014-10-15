@@ -11,7 +11,7 @@
 USING_NS_CC;
 
 Mushroom::Mushroom() :
-		vec(vec_stop), jumping(true), dying(false) {
+		vec(vec_stop), jumping(true), dying(false), inwater(false) {
 	// TODO Auto-generated constructor stub
 }
 
@@ -37,11 +37,11 @@ PHY_TYPE Mushroom::getPhyType() {
 void Mushroom::createPhyBody() {
 	b2BodyDef b2BodyDef;
 	b2BodyDef.type = b2_dynamicBody;
-	b2BodyDef.bullet = true;
+	//b2BodyDef.bullet = true;
 	b2BodyDef.fixedRotation = true;
 	b2BodyDef.position = b2Vec2(c2p(this->getPosition().x),
 	c2p(this->getPosition().y));
-	b2body = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
+	b2PhyBody = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
 
 	b2PolygonShape b2Shape;
 	b2Shape.SetAsBox(c2p(this->getContentSize().width / 2),
@@ -52,14 +52,14 @@ void Mushroom::createPhyBody() {
 	fixtureDef.shape = &b2Shape;
 	fixtureDef.density = 3.0f;
 	// Add the shape to the body.
-	b2body->CreateFixture(&fixtureDef);
+	b2PhyBody->CreateFixture(&fixtureDef);
 //	b2MassData mass;
 //	mass.mass = 1.0f;
 //	mass.center = b2Vec2_zero;
 //	b2body->SetMassData(&mass);
 	//b2body->SetLinearDamping(0.0f);
-	b2body->SetLinearVelocity(b2Vec2_zero);
-	b2body->SetUserData(this);
+	b2PhyBody->SetLinearVelocity(b2Vec2_zero);
+	b2PhyBody->SetUserData(this);
 }
 
 void Mushroom::setVec(MushroomVec vec) {
@@ -70,11 +70,16 @@ bool Mushroom::isVec(MushroomVec vec) {
 	return this->vec == vec;
 }
 
+void Mushroom::gameover() {
+	this->getParent()->removeAllChildren();
+	CCDirector::sharedDirector()->replaceScene(
+			CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
+}
+
 void Mushroom::update(float delta) {
 	float y = this->getPositionY();
-	if (y < -LOCAL_RESOLUTION.height / 2) { //游戏结束
-		CCDirector::sharedDirector()->replaceScene(
-				CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
+	if (y < -LOCAL_RESOLUTION.height / 2) {
+		gameover();
 	}
 
 	PhySprite::update(delta);
@@ -108,29 +113,29 @@ void Mushroom::update(float delta) {
 }
 
 void Mushroom::forward() {
-	b2Vec2 v = this->b2body->GetLinearVelocity();
+	b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
 	v.x = 5.0f;
-	this->b2body->SetLinearVelocity(v);
+	this->b2PhyBody->SetLinearVelocity(v);
 }
 
 void Mushroom::back() {
-	b2Vec2 v = this->b2body->GetLinearVelocity();
+	b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
 	v.x = -5.0f;
-	this->b2body->SetLinearVelocity(v);
+	this->b2PhyBody->SetLinearVelocity(v);
 }
 
 void Mushroom::stop() {
-	b2Vec2 v = this->b2body->GetLinearVelocity();
+	b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
 	v.x = 0.0f;
-	this->b2body->SetLinearVelocity(v);
+	this->b2PhyBody->SetLinearVelocity(v);
 }
 
 void Mushroom::jump() {
 	if (!jumping) {
 		this->jumping = true;
-		b2Vec2 v = this->b2body->GetLinearVelocity();
-		v.y = 5.0f;
-		this->b2body->SetLinearVelocity(v);
+		b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
+		v.y = 7.0f;
+		this->b2PhyBody->SetLinearVelocity(v);
 	}
 }
 
@@ -141,9 +146,9 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 		b2ManifoldPoint mp2 = manifold->points[1];
 		if (mp1.localPoint.x == mp2.localPoint.x) { //侧边碰撞
 			this->dying = true;
-			b2Vec2 v = this->b2body->GetLinearVelocity();
+			b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
 			v.x = -v.x;
-			this->b2body->SetLinearVelocity(v);
+			this->b2PhyBody->SetLinearVelocity(v);
 		} else if (mp1.localPoint.y == mp2.localPoint.y) { //底边碰撞
 			if (this->getPositionY() > other->getPositionY()) { //蘑菇在上边
 				this->dying = false;
@@ -152,6 +157,7 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 					 //nothing to do
 			}
 		}
+	} else if (other->getPhyType() == WATER_EDGE) {
 	}
 }
 

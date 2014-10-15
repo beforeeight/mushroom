@@ -14,7 +14,7 @@
 #define POS_JUNCTION 0
 
 enum PHY_TYPE {
-	MUSHROOM, BRICK
+	MUSHROOM, BRICK, WATER_EDGE
 };
 
 class PhySprite: public cocos2d::CCSprite {
@@ -27,6 +27,8 @@ public:
 
 	static void initPhySprite(PhySprite &sprite);
 
+	static void initPhySprite(PhySprite &sprite, bool update);
+
 	virtual PHY_TYPE getPhyType() = 0;
 
 	b2Body* getB2Body();
@@ -38,7 +40,7 @@ public:
 	}
 
 protected:
-	b2Body *b2body;
+	b2Body *b2PhyBody;
 
 	virtual void createPhyBody() = 0;
 

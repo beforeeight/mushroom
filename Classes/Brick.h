@@ -28,7 +28,7 @@ public:
 
 	virtual bool init();
 
-	CREATE_FUNC(Brick)
+	CREATE_FUNC (Brick)
 
 };
 
@@ -52,13 +52,18 @@ public:
 
 	virtual PHY_TYPE getPhyType();
 
+	virtual void beginContact(PhySprite *other, b2Contact* contact);
+
 protected:
+	unsigned int score;
+
+	Bricks *previous, *next;
+
 	virtual void createPhyBody();
 
 	virtual void initPhyBody();
 
 private:
-	Bricks *previous, *next;
 
 	BrickEmitter *emitter;
 
@@ -71,6 +76,21 @@ private:
 	void pause();
 
 	void resume();
+};
+
+class HorizontalBricks: public Bricks {
+public:
+	HorizontalBricks();
+
+	virtual ~HorizontalBricks();
+
+	static HorizontalBricks* create(int num);
+
+	virtual void update(float delta);
+
+protected:
+
+	virtual void initPhyBody();
 };
 
 /*--------- Class BatchBrick --------*/

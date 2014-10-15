@@ -8,28 +8,34 @@
 #include "PhySprite.h"
 
 PhySprite::PhySprite() :
-		b2body(NULL) {
+		b2PhyBody(NULL) {
 }
 
 PhySprite::~PhySprite() {
-	PhyWorld::shareWorld()->DestroyBody(this->b2body);
+	PhyWorld::shareWorld()->DestroyBody(this->b2PhyBody);
 }
 
-void PhySprite::initPhySprite(PhySprite &sprite) {
+void PhySprite::initPhySprite(PhySprite &sprite, bool update) {
 	sprite.createPhyBody();
-	sprite.scheduleUpdate();
+	if (update) {
+		sprite.scheduleUpdate();
+	}
 	sprite.initPhyBody();
 }
 
+void PhySprite::initPhySprite(PhySprite &sprite) {
+	initPhySprite(sprite, true);
+}
+
 b2Body* PhySprite::getB2Body() {
-	return this->b2body;
+	return this->b2PhyBody;
 }
 
 void PhySprite::update(float delta) {
-	if (b2body) {
-		this->setPosition(ccp(p2c(b2body->GetPosition().x),
-				p2c(b2body->GetPosition().y)));
-		this->setRotation(-1 * CC_RADIANS_TO_DEGREES(b2body->GetAngle()));
+	if (b2PhyBody) {
+		this->setPosition(ccp(p2c(b2PhyBody->GetPosition().x),
+				p2c(b2PhyBody->GetPosition().y)));
+		this->setRotation(-1 * CC_RADIANS_TO_DEGREES(b2PhyBody->GetAngle()));
 	}
 }
 

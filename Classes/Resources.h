@@ -59,6 +59,8 @@ private:
 	const CCString* confByKey(const char * key);
 };
 
+typedef void (CCObject::*ScoreFunc)(CCObject*, unsigned int);
+
 class Context {
 public:
 	Context();
@@ -81,6 +83,8 @@ public:
 
 	unsigned int increaseScore();
 
+	unsigned int increaseScore(unsigned int delta);
+
 	void clearScore();
 
 	unsigned int getScore() const;
@@ -88,14 +92,21 @@ public:
 	unsigned int getHighScore() const;
 
 	bool isNewRecord() const;
+
+	void setScoreTarget(CCObject *target, ScoreFunc);
 private:
-	bool sound;
 
 	unsigned int score;
 
 	bool newrecord;
 
+	bool sound;
+
 	unsigned int highScore;
+
+	CCObject *scoreTarget;
+
+	ScoreFunc scoreFunc;
 };
 
 #define LOCAL_RESOURCES LocalResources::sharedResources()

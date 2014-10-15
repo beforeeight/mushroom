@@ -18,6 +18,8 @@ public:
 	~PhyWorld();
 
 	static b2World* shareWorld(void);
+
+	static void purgeB2World();
 };
 
 #define p2c(__x__) __x__*32
