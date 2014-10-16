@@ -45,12 +45,12 @@ void WaterEdge::createPhyBody() {
 	CCPoint lp = ccpp(-0.5,0);
 	CCPoint rp = ccpp(0.5,0);
 	b2BodyDef b2BodyDef;
-	b2BodyDef.position.Set(c2p(this->getPositionX()),
-	c2p(this->getPositionY()));
+	b2BodyDef.position.Set(c2b(this->getPositionX()),
+	c2b(this->getPositionY()));
 	b2BodyDef.type = b2_staticBody;
 	this->b2PhyBody = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
 	b2EdgeShape shape;
-	shape.Set(b2Vec2(c2p(lp.x), c2p(lp.y)), b2Vec2(c2p(rp.x), c2p(rp.y)));
+	shape.Set(b2Vec2(c2b(lp.x), c2b(lp.y)), b2Vec2(c2b(rp.x), c2b(rp.y)));
 	b2Fixture* fixture = this->b2PhyBody->CreateFixture(&shape, 0.0f);
 	fixture->SetSensor(true);
 	b2PhyBody->SetUserData(this);

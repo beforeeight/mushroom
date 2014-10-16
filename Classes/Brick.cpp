@@ -22,21 +22,21 @@ BrickEmitter::~BrickEmitter() {
 }
 
 void BrickEmitter::initBricks() {
-	int num = 30;
+	int num = 10;
 	Bricks* newBricks = Bricks::create(num);
 	newBricks->score = 0;
 	lastBricks = newBricks;
 	newBricks->emitter = this;
 	newBricks->setPosition(
-			ccpp(-0.5, 0) + ccp(0, POS_JUNCTION - BRICK_HEIGHT / 2));
+			ccpp(0, 0) + ccp(0, POS_JUNCTION - BRICK_HEIGHT / 2));
 	PhySprite::initPhySprite(*newBricks);
 	this->targetLayer.addChild(newBricks);
-	//this->emitBrick(newBricks);
 }
 
 Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
 	Bricks* newBricks;
-	if (rand() % 2 == 0) {
+
+	if (rand() % 2 == 0 && lastBrick && lastBrick->isNormal()) {
 		newBricks = HorizontalBricks::create(num);
 	} else {
 		newBricks = Bricks::create(num);
@@ -164,17 +164,19 @@ Bricks* Bricks::create(int num) {
 void Bricks::createPhyBody() {
 	b2BodyDef b2BodyDef;
 	b2BodyDef.type = b2_kinematicBody;
-	b2BodyDef.position = b2Vec2(c2p(this->getPosition().x),
-	c2p(this->getPosition().y));
+	//b2BodyDef.type = b2_dynamicBody;
+	//b2BodyDef.gravityScale = 0.0f;
+	b2BodyDef.fixedRotation = true;
+	b2BodyDef.position = b2Vec2(c2b(this->getPosition().x),
+	c2b(this->getPosition().y));
 	b2PhyBody = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
-
 	b2PolygonShape b2box;
-	b2box.SetAsBox(c2p(this->getContentSize().width / 2),
-	c2p(this->getContentSize().height / 2));
-
+	b2box.SetAsBox(c2b(this->getContentSize().width / 2),
+	c2b(this->getContentSize().height / 2));
 // Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2box;
+	//fixtureDef.friction = 1.0f;
 // Add the shape to the body.
 	b2PhyBody->CreateFixture(&fixtureDef);
 	b2PhyBody->SetUserData(this);
@@ -203,12 +205,14 @@ void Bricks::updateStatus() {
 	if (this->status == brick_ready && head.x < ccpp(0.5, 0).x) {
 		this->emitter->emitBrick(this);
 		this->status = brick_running;
+		onRunning();
 		return;
 	}
 
 	if ((this->status == brick_running || this->status == brick_ready)
 			&& tail.x < ccpp(-0.5, -1).x) {
 		this->status = brick_over;
+		onOverStatus();
 		return;
 	}
 }
@@ -228,7 +232,8 @@ void Bricks::resume() {
 	}
 }
 
-HorizontalBricks::HorizontalBricks() {
+HorizontalBricks::HorizontalBricks() :
+		speedScale(2.0f) {
 	score = 2;
 }
 
@@ -271,8 +276,10 @@ void HorizontalBricks::update(float delta) {
 
 }
 
-void HorizontalBricks::initPhyBody() {
+void HorizontalBricks::onRunning() {
 	if (b2PhyBody) {
-		b2PhyBody->SetLinearVelocity(b2Vec2(-5, 0));
+		b2Vec2 v = b2PhyBody->GetLinearVelocity();
+		v.x = v.x * speedScale;
+		b2PhyBody->SetLinearVelocity(v);
 	}
 }

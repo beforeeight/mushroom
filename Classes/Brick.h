@@ -54,6 +54,10 @@ public:
 
 	virtual void beginContact(PhySprite *other, b2Contact* contact);
 
+	virtual bool isNormal() {
+		return true;
+	}
+
 protected:
 	unsigned int score;
 
@@ -62,6 +66,12 @@ protected:
 	virtual void createPhyBody();
 
 	virtual void initPhyBody();
+
+	virtual void onRunning() {
+	}
+
+	virtual void onOverStatus() {
+	}
 
 private:
 
@@ -88,9 +98,15 @@ public:
 
 	virtual void update(float delta);
 
+	virtual bool isNormal() {
+		return false;
+	}
 protected:
 
-	virtual void initPhyBody();
+	virtual void onRunning();
+
+private:
+	float speedScale;
 };
 
 /*--------- Class BatchBrick --------*/

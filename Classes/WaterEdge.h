@@ -11,6 +11,8 @@
 #include "PhySprite.h"
 
 class WaterEdge: public PhySprite {
+
+
 public:
 	WaterEdge();
 

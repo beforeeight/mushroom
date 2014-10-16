@@ -52,5 +52,12 @@ b2World* PhyWorld::shareWorld(void) {
 }
 
 void PhyWorld::purgeB2World() {
-	CC_SAFE_DELETE(world);
+	if (world) {
+		delete (world);
+		world = NULL;
+	}
+	if (_debugDraw) {
+		delete (_debugDraw);
+		_debugDraw = NULL;
+	}
 }

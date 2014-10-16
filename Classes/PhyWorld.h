@@ -22,7 +22,7 @@ public:
 	static void purgeB2World();
 };
 
-#define p2c(__x__) __x__*32
-#define c2p(__x__) __x__/32
+#define b2c(__x__) __x__*32
+#define c2b(__x__) __x__/32
 
 #endif /* PHYWORLD_H_ */

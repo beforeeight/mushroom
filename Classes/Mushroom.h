@@ -9,14 +9,14 @@
 #define MUSHROOM_H_
 
 #include "PhySprite.h"
+#include "Brick.h"
 
 enum MushroomVec {
-	vec_forward, vec_back, vec_stop
+	vec_forward, vec_back, vec_nature
 };
 class Mushroom: public PhySprite {
 
 	MushroomVec vec;
-	void gameover();
 
 public:
 
@@ -26,7 +26,7 @@ public:
 
 	virtual bool init();
 
-	CREATE_FUNC(Mushroom)
+	CREATE_FUNC (Mushroom)
 
 	virtual void update(float delta);
 
@@ -43,16 +43,25 @@ public:
 	virtual void endContact(PhySprite *other, b2Contact* contact);
 
 protected:
-	bool jumping, dying, inwater;
+
+	int touchEdge;
 
 	void forward();
 
 	void back();
 
+	void naturalSpeed();
+
 	void stop();
 
 	virtual void createPhyBody();
 
+private:
+	Bricks *underBricks;
+
+	void gameover();
+
+	void setSpeedX(float speed);
 };
 
 #endif /* MUSHROOM_H_ */

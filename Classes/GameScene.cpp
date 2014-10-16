@@ -50,6 +50,7 @@ void GameLayer::draw() {
 bool GameLayer::init() {
 	if (CCLayer::init()) {
 		LOCAL_CONTEXT->clearScore();
+		PhyWorld::purgeB2World();
 
 		this->setTouchMode(kCCTouchesAllAtOnce);
 		this->setTouchEnabled(true);
@@ -91,19 +92,23 @@ bool GameLayer::init() {
 		leftBodyDef.type = b2_staticBody;
 		this->leftEdge = PhyWorld::shareWorld()->CreateBody(&leftBodyDef);
 		b2EdgeShape leftShape;
-		leftShape.Set(b2Vec2(c2p(ltp.x), c2p(ltp.y)),
-				b2Vec2(c2p(lbp.x), c2p(lbp.y)));
+		leftShape.Set(b2Vec2(c2b(ltp.x), c2b(ltp.y)),
+				b2Vec2(c2b(lbp.x), c2b(lbp.y)));
 		leftEdge->CreateFixture(&leftShape, 0.0f);
-		//leftBody->SetLinearDamping(0.0f);
+		PhySprite *leftES = PhySprite::create(leftEdge);
+		leftES->setPhyType(BROADSIDE);
+		this->addChild(leftES);
 
 		b2BodyDef rightBodyDef;
 		rightBodyDef.position.Set(0, 0);
 		this->rightEdge = PhyWorld::shareWorld()->CreateBody(&rightBodyDef);
 		b2EdgeShape rightShape;
-		rightShape.Set(b2Vec2(c2p(rtp.x), c2p(rtp.y)),
-				b2Vec2(c2p(rbp.x), c2p(rbp.y)));
+		rightShape.Set(b2Vec2(c2b(rtp.x), c2b(rtp.y)),
+				b2Vec2(c2b(rbp.x), c2b(rbp.y)));
 		rightEdge->CreateFixture(&rightShape, 0.0f);
-		//rightBody->SetLinearDamping(0.0f);
+		PhySprite *rightES = PhySprite::create(rightEdge);
+		rightES->setPhyType(BROADSIDE);
+		this->addChild(rightES);
 
 		Mushroom *mushroom = Mushroom::create();
 		mushroom->setPosition(ccpp(-0.2,0.5));
@@ -192,7 +197,7 @@ void GameLayer::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent) {
 							LOCAL_RESOLUTION.height / 2);
 			if (!this->getChildByTag(TAG_BTN_JUMP)->boundingBox().containsPoint(
 					startPoint)) {
-				mushroom->setVec(vec_stop);
+				mushroom->setVec(vec_nature);
 			}
 		}
 	}
