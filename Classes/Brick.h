@@ -11,6 +11,11 @@
 #include "PhySprite.h"
 #include "PhyWorld.h"
 
+#define BRICKS_SPEED 2
+#define HOR_BRICKS_SPEED_SCALE 1.8f
+#define VER_BRICKS_SPEED 5.0f
+#define VER_AMPLITUDE 0.1f
+
 #define TEXTURE_BRICK "item_cubic.png"
 
 enum BrickStatus {
@@ -61,6 +66,8 @@ public:
 protected:
 	unsigned int score;
 
+	float movingSpeed;
+
 	Bricks *previous, *next;
 
 	virtual void createPhyBody();
@@ -78,6 +85,8 @@ private:
 	BrickEmitter *emitter;
 
 	b2Vec2 linearVelocity;
+
+	b2Joint* joint;
 
 	BrickStatus status;
 
@@ -109,6 +118,26 @@ private:
 	float speedScale;
 };
 
+class VerticalBricks: public Bricks {
+public:
+	VerticalBricks();
+
+	virtual ~VerticalBricks();
+
+	static VerticalBricks* create(int num);
+
+	virtual void update(float delta);
+
+	virtual bool isNormal() {
+		return false;
+	}
+protected:
+
+	virtual void onRunning();
+
+private:
+	float speed, amplitude, originalY;
+};
 /*--------- Class BatchBrick --------*/
 class BrickEmitter {
 
@@ -126,10 +155,11 @@ public:
 	void resume();
 
 private:
-	Bricks *lastBricks;
+	Bricks *tailBricks;
 
 	CCLayer &targetLayer;
 
+	Bricks* createBricks(Bricks*& lastBrick, int num);
 	Bricks* emitBrick(int num, Bricks* lastBrick);
 
 	CCPoint computeSpan(Bricks* lastBrick, Bricks* newBricks);

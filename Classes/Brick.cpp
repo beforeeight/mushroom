@@ -22,10 +22,10 @@ BrickEmitter::~BrickEmitter() {
 }
 
 void BrickEmitter::initBricks() {
-	int num = 10;
+	int num = 20;
 	Bricks* newBricks = Bricks::create(num);
 	newBricks->score = 0;
-	lastBricks = newBricks;
+	tailBricks = newBricks;
 	newBricks->emitter = this;
 	newBricks->setPosition(
 			ccpp(0, 0) + ccp(0, POS_JUNCTION - BRICK_HEIGHT / 2));
@@ -33,25 +33,34 @@ void BrickEmitter::initBricks() {
 	this->targetLayer.addChild(newBricks);
 }
 
-Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
-	Bricks* newBricks;
-
+inline Bricks* BrickEmitter::createBricks(Bricks*& lastBrick, int num) {
+	Bricks* newBricks = 0;
 	if (rand() % 2 == 0 && lastBrick && lastBrick->isNormal()) {
-		newBricks = HorizontalBricks::create(num);
+		if (rand() % 2 == 0) {
+			newBricks = HorizontalBricks::create(num);
+		} else {
+			newBricks = VerticalBricks::create(num);
+		}
 	} else {
 		newBricks = Bricks::create(num);
 	}
+	return newBricks;
+}
 
-	lastBricks = newBricks;
-	newBricks->emitter = this;
-	if (lastBrick) {
-		newBricks->previous = lastBrick;
-		lastBrick->next = newBricks;
+Bricks* BrickEmitter::emitBrick(int num, Bricks* lastBrick) {
+	Bricks* newBricks = createBricks(lastBrick, num);
+	if (newBricks) {
+		tailBricks = newBricks;
+		newBricks->emitter = this;
+		if (lastBrick) {
+			newBricks->previous = lastBrick;
+			lastBrick->next = newBricks;
+		}
+		CCPoint pos = computeSpan(lastBrick, newBricks);
+		newBricks->setPosition(pos);
+		PhySprite::initPhySprite(*newBricks);
+		this->targetLayer.addChild(newBricks);
 	}
-	CCPoint pos = computeSpan(lastBrick, newBricks);
-	newBricks->setPosition(pos);
-	PhySprite::initPhySprite(*newBricks);
-	this->targetLayer.addChild(newBricks);
 	return newBricks;
 }
 
@@ -71,14 +80,14 @@ Bricks * BrickEmitter::emitBrick(Bricks *lastBrick) {
 }
 
 void BrickEmitter::pause() {
-	if (lastBricks) {
-		lastBricks->pause();
+	if (tailBricks) {
+		tailBricks->pause();
 	}
 }
 
 void BrickEmitter::resume() {
-	if (lastBricks) {
-		lastBricks->resume();
+	if (tailBricks) {
+		tailBricks->resume();
 	}
 }
 /*------------ Single Brick ----------*/
@@ -103,7 +112,8 @@ bool Brick::init() {
 
 /*------------ Group Brick with b2Body ----------*/
 Bricks::Bricks() :
-		score(1), previous(0), next(0), emitter(0), status(brick_ready) {
+		score(1), movingSpeed(BRICKS_SPEED), previous(0), next(0), emitter(0), status(
+				brick_ready), joint(0) {
 }
 
 Bricks::~Bricks() {
@@ -112,6 +122,9 @@ Bricks::~Bricks() {
 	}
 	if (next) {
 		next->previous = 0;
+	}
+	if (joint) {
+		PhyWorld::shareWorld()->DestroyJoint(joint);
 	}
 }
 
@@ -144,6 +157,11 @@ void Bricks::beginContact(PhySprite *other, b2Contact* contact) {
 			if (this->getPositionY() < other->getPositionY()) { //蘑菇在上边
 				LOCAL_CONTEXT->increaseScore(score);
 				score = 0;
+				b2JointDef jointDef;
+				jointDef.type = e_weldJoint;
+				jointDef.bodyA = this->b2PhyBody;
+				jointDef.bodyB = other->getB2Body();
+				joint = PhyWorld::shareWorld()->CreateJoint(&jointDef);
 			}
 		}
 	}
@@ -176,7 +194,7 @@ void Bricks::createPhyBody() {
 // Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2box;
-	//fixtureDef.friction = 1.0f;
+	fixtureDef.friction = 1.0f;
 // Add the shape to the body.
 	b2PhyBody->CreateFixture(&fixtureDef);
 	b2PhyBody->SetUserData(this);
@@ -184,7 +202,7 @@ void Bricks::createPhyBody() {
 
 void Bricks::initPhyBody() {
 	if (b2PhyBody) {
-		b2PhyBody->SetLinearVelocity(b2Vec2(-2, 0));
+		b2PhyBody->SetLinearVelocity(b2Vec2(-abs(movingSpeed), 0));
 	}
 }
 void Bricks::update(float delta) {
@@ -233,7 +251,7 @@ void Bricks::resume() {
 }
 
 HorizontalBricks::HorizontalBricks() :
-		speedScale(2.0f) {
+		speedScale(HOR_BRICKS_SPEED_SCALE) {
 	score = 2;
 }
 
@@ -280,6 +298,50 @@ void HorizontalBricks::onRunning() {
 	if (b2PhyBody) {
 		b2Vec2 v = b2PhyBody->GetLinearVelocity();
 		v.x = v.x * speedScale;
+		b2PhyBody->SetLinearVelocity(v);
+	}
+}
+
+/* VerticalBricks */
+VerticalBricks::VerticalBricks() :
+		speed(VER_BRICKS_SPEED), amplitude(VER_AMPLITUDE), originalY(
+				POS_JUNCTION) {
+	score = 2;
+}
+
+VerticalBricks::~VerticalBricks() {
+}
+
+VerticalBricks* VerticalBricks::create(int num) {
+	VerticalBricks *pRet = new VerticalBricks();
+	if (pRet && pRet->init(num)) {
+		pRet->autorelease();
+		return pRet;
+	} else {
+		delete pRet;
+		pRet = NULL;
+		return NULL;
+	}
+}
+
+void VerticalBricks::update(float delta) {
+	if (this->getPositionY() >= originalY + ccpy(amplitude)) {
+		b2Vec2 speedVec = b2PhyBody->GetLinearVelocity();
+		speedVec.y = -abs(speed);
+		b2PhyBody->SetLinearVelocity(speedVec);
+	} else if (this->getPositionY() <= originalY - ccpy(amplitude)) {
+		b2Vec2 speedVec = b2PhyBody->GetLinearVelocity();
+		speedVec.y = abs(speed);
+		b2PhyBody->SetLinearVelocity(speedVec);
+	}
+	Bricks::update(delta);
+}
+
+void VerticalBricks::onRunning() {
+	if (b2PhyBody) {
+		originalY = this->getPositionY();
+		b2Vec2 v = b2PhyBody->GetLinearVelocity();
+		v.y = speed;
 		b2PhyBody->SetLinearVelocity(v);
 	}
 }

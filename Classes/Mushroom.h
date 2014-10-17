@@ -8,6 +8,11 @@
 #ifndef MUSHROOM_H_
 #define MUSHROOM_H_
 
+#define MUSHROOM_FORWARD_SPEED 7
+#define MUSHROOM_BACK_SPEED -5
+#define MUSHROOM_JUMP_VELOCITY 10.0f
+#define ACC_PER_SEC 0.1f
+
 #include "PhySprite.h"
 #include "Brick.h"
 
@@ -40,6 +45,9 @@ public:
 
 	virtual void beginContact(PhySprite *other, b2Contact* contact);
 
+	virtual void PreSolve(PhySprite *other, b2Contact* contact,
+			const b2Manifold* oldManifold);
+
 	virtual void endContact(PhySprite *other, b2Contact* contact);
 
 protected:
@@ -57,9 +65,15 @@ protected:
 	virtual void createPhyBody();
 
 private:
+	float forwardSpeed, backSpeed, accPerSec;
+
+	float vecLastTime;
+
 	Bricks *underBricks;
 
 	void gameover();
+
+	void setSpeed(b2Vec2 vec);
 
 	void setSpeedX(float speed);
 };

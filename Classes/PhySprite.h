@@ -49,6 +49,11 @@ public:
 	virtual void beginContact(PhySprite *other, b2Contact* contact) {
 	}
 
+	virtual void PreSolve(PhySprite *other, b2Contact* contact,
+			const b2Manifold* oldManifold) {
+
+	}
+
 	virtual void endContact(PhySprite *other, b2Contact* contact) {
 	}
 

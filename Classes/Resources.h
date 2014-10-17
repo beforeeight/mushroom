@@ -117,6 +117,8 @@ private:
 
 #define LOCAL_CONTEXT Context::sharedContext()
 
-#define ccpp(__X__,__Y__) cocos2d::CCPointMake(((float)(__X__))*LOCAL_RESOLUTION.width, ((float)(__Y__))*LOCAL_RESOLUTION.height)
+#define ccpx(__X__) ((float)(__X__))*LOCAL_RESOLUTION.width
+#define ccpy(__Y__) ((float)(__Y__))*LOCAL_RESOLUTION.height
+#define ccpp(__X__,__Y__) cocos2d::CCPointMake(ccpx(__X__), ccpy(__Y__))
 
 #endif

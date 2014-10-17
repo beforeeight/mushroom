@@ -61,18 +61,14 @@ void MushroomContactListener::BeginContact(b2Contact* contact) {
 
 void MushroomContactListener::PreSolve(b2Contact* contact,
 		const b2Manifold* oldManifold) {
-//	Mushroom *mushroom = findMushroom(contact);
-//	Bricks *bricks = findBricks(contact);
-//	//CCLog("bbb  %ld,%ld", (long) mushroom, (long) bricks);
-//	if (mushroom && bricks) {
-//		float bricksTop = bricks->getPositionY()
-//				+ bricks->getContentSize().height / 2;
-//		float mushBottom = mushroom->getPositionY()
-//				- mushroom->getContentSize().height / 2;
-//		if (mushBottom < bricksTop) {
-//			//contact->SetEnabled(false);
-//		}
-//	}
+	PhySprite* phyA =
+			(PhySprite*) (contact->GetFixtureA()->GetBody()->GetUserData());
+	PhySprite* phyB =
+			(PhySprite*) (contact->GetFixtureB()->GetBody()->GetUserData());
+	if (phyA && phyB) {
+		phyA->PreSolve(phyB, contact, oldManifold);
+		phyB->PreSolve(phyA, contact, oldManifold);
+	}
 }
 
 void MushroomContactListener::EndContact(b2Contact* contact) {
