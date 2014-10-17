@@ -111,7 +111,7 @@ void Mushroom::update(float delta) {
 			back();
 			break;
 		case vec_nature:
-			//naturalSpeed();
+			naturalSpeed();
 			break;
 		}
 		vecLastTime += delta;
@@ -186,12 +186,18 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 
 void Mushroom::PreSolve(PhySprite *other, b2Contact* contact,
 		const b2Manifold* oldManifold) {
-	if (other->getPhyType() == BRICK && underBricks && underBricks != other) {
-		if (other->boundingBox().containsPoint(
-				ccp(this->getPositionX(), other->getPositionY()))) {
-			/*-- 蘑菇在两块转头之间走，当蘑菇的position的x轴坐标落到砖板上，设置这块砖位蘑菇脚下的砖 --*/
-			underBricks = (Bricks*) other;
+	if (other->getPhyType() == BRICK) {
+
+		if (!underBricks) {
+
+		} else if (underBricks && underBricks != other) {
+			if (other->boundingBox().containsPoint(
+					ccp(this->getPositionX(), other->getPositionY()))) {
+				/*-- 蘑菇在两块转头之间走，当蘑菇的position的x轴坐标落到砖板上，设置这块砖位蘑菇脚下的砖 --*/
+				underBricks = (Bricks*) other;
+			}
 		}
+
 	}
 }
 
