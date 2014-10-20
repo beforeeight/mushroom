@@ -24,7 +24,7 @@ PhyWorld::~PhyWorld() {
 
 b2World* PhyWorld::shareWorld(void) {
 	if (!world) {
-		b2Vec2 gravity(0.0f, -9.8f);
+		b2Vec2 gravity(0.0f, -WORLD_GRAVITY);
 		//b2Vec2 *gravity = (b2Vec2*) malloc(sizeof(b2Vec2));
 		//gravity->Set(0.0f, -10.0f);
 		world = new b2World(gravity);

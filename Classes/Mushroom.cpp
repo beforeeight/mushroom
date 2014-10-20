@@ -11,9 +11,9 @@
 USING_NS_CC;
 
 Mushroom::Mushroom() :
-		vec(vec_nature), touchEdge(0), forwardSpeed(MUSHROOM_FORWARD_SPEED), backSpeed(
-				MUSHROOM_BACK_SPEED), accPerSec(ACC_PER_SEC), vecLastTime(0), underBricks(
-				0) {
+		vec(vec_nature), touchEdge(0), jumping(false), forwardSpeed(
+				MUSHROOM_FORWARD_SPEED), backSpeed(MUSHROOM_BACK_SPEED), accPerSec(
+				ACC_PER_SEC), contactFriction(0) {
 	// TODO Auto-generated constructor stub
 }
 
@@ -53,22 +53,12 @@ void Mushroom::createPhyBody() {
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2Shape;
 	fixtureDef.density = 5.0f;
-	fixtureDef.friction = 0.5f;
+	fixtureDef.friction = 0.8f;
 	// Add the shape to the body.
 	b2PhyBody->CreateFixture(&fixtureDef);
 	//b2PhyBody->SetLinearDamping(0.0f);
 	b2PhyBody->SetLinearVelocity(b2Vec2_zero);
 	b2PhyBody->SetUserData(this);
-}
-
-void Mushroom::setVec(MushroomVec vec) {
-	if (this->vec != vec) {
-		vecLastTime = 0;
-	}
-	if (vec == vec_nature) {
-		stop();
-	}
-	this->vec = vec;
 }
 
 bool Mushroom::isVec(MushroomVec vec) {
@@ -102,54 +92,60 @@ void Mushroom::update(float delta) {
 		gameover();
 		return;
 	}
-	if (underBricks) { //脚底下有板子
-		switch (this->vec) {
-		case vec_forward:
-			forward();
-			break;
-		case vec_back:
-			back();
-			break;
-		case vec_nature:
-			naturalSpeed();
-			break;
-		}
-		vecLastTime += delta;
-	}
 	PhySprite::update(delta);
 }
 
-void Mushroom::forward() {
-	float x = (abs(forwardSpeed)
-			+ underBricks->getB2Body()->GetLinearVelocity().x)
-			* (1 + vecLastTime * accPerSec);
-	this->setSpeed(b2Vec2(x, underBricks->getB2Body()->GetLinearVelocity().y));
+void Mushroom::setVec(MushroomVec vec) {
+	if (!jumping) {
+		if (this->vec != vec) {
+			stop();
+		}
+//		switch (vec) {
+//		case vec_forward:
+//			this->b2PhyBody->ApplyLinearImpulse(
+//					b2Vec2(this->b2PhyBody->GetMass() * 5, 0),
+//					this->b2PhyBody->GetLocalCenter());
+//			setSpeedX(MUSHROOM_FORWARD_SPEED);
+//			break;
+//		case vec_back:
+//			this->b2PhyBody->ApplyLinearImpulse(
+//					b2Vec2(this->b2PhyBody->GetMass() * -5, 0),
+//					this->b2PhyBody->GetLocalCenter());
+//			setSpeedX(MUSHROOM_BACK_SPEED);
+//			break;
+//		case vec_nature:
+//			stop();
+//			break;
+//		}
+	}
+	this->vec = vec;
 }
 
-void Mushroom::back() {
-	float x = -abs(backSpeed) + underBricks->getB2Body()->GetLinearVelocity().x;
-	this->setSpeed(b2Vec2(x, underBricks->getB2Body()->GetLinearVelocity().y));
-
+void Mushroom::keepForward(float friction) {
+//	float x = this->b2PhyBody->GetMass() * WORLD_GRAVITY * friction;
+//	this->b2PhyBody->ApplyForceToCenter(b2Vec2(x, 0));
+	this->setSpeedX(MUSHROOM_FORWARD_SPEED);
 }
 
-void Mushroom::naturalSpeed() {
-	this->setSpeed(underBricks->getB2Body()->GetLinearVelocity());
+void Mushroom::keepBack(float friction) {
+//	float x = this->b2PhyBody->GetMass() * WORLD_GRAVITY * friction;
+//	this->b2PhyBody->ApplyForceToCenter(b2Vec2(-x, 0));
+	this->setSpeedX(MUSHROOM_BACK_SPEED);
 }
 
 void Mushroom::stop() {
-	if (underBricks) {
+	if (!jumping) {
 		this->setSpeedX(0);
 	}
 }
 
 void Mushroom::jump() {
-	if (underBricks) {
-		underBricks = 0;
-		//this->jumping = true;
+	if (!jumping) {
+		jumping = true;
 		float mass = this->b2PhyBody->GetMass();
 		b2Vec2 curVec = this->b2PhyBody->GetLinearVelocity();
 		curVec.y = 0;
-		this->b2PhyBody->SetLinearVelocity(curVec);
+		//this->b2PhyBody->SetLinearVelocity(curVec);
 		this->b2PhyBody->ApplyLinearImpulse(
 				b2Vec2(0, mass * MUSHROOM_JUMP_VELOCITY),
 				this->b2PhyBody->GetLocalCenter());
@@ -157,23 +153,18 @@ void Mushroom::jump() {
 }
 
 void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
-
 	if (other->getPhyType() == BRICK) {
+		this->contactFriction = contact->GetFriction();
 		b2Manifold *manifold = contact->GetManifold();
 		b2ManifoldPoint mp1 = manifold->points[0];
 		b2ManifoldPoint mp2 = manifold->points[1];
 		if (mp1.localPoint.x == mp2.localPoint.x) { //侧边碰撞
-			//this->dying = true;
 			b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
 			v.x = -v.x;
 			this->b2PhyBody->SetLinearVelocity(v);
 		} else if (mp1.localPoint.y == mp2.localPoint.y) { //底边碰撞
 			if (this->getPositionY() > other->getPositionY()) { //蘑菇在上边
-					//this->dying = false;
-					//this->jumping = false;
-				if (!underBricks) {
-					underBricks = (Bricks*) other;
-				}
+				this->jumping = false;
 			} else { //蘑菇在下边
 				//nothing to do
 			}
@@ -186,28 +177,23 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 
 void Mushroom::PreSolve(PhySprite *other, b2Contact* contact,
 		const b2Manifold* oldManifold) {
-	if (other->getPhyType() == BRICK) {
-
-		if (!underBricks) {
-
-		} else if (underBricks && underBricks != other) {
-			if (other->boundingBox().containsPoint(
-					ccp(this->getPositionX(), other->getPositionY()))) {
-				/*-- 蘑菇在两块转头之间走，当蘑菇的position的x轴坐标落到砖板上，设置这块砖位蘑菇脚下的砖 --*/
-				underBricks = (Bricks*) other;
-			}
+	if (!jumping) { //脚底下有板子
+		float friction = contact->GetFriction();
+		switch (this->vec) {
+		case vec_forward:
+			keepForward(friction);
+			break;
+		case vec_back:
+			keepBack(friction);
+			break;
+		case vec_nature:
+			break;
 		}
-
 	}
 }
 
 void Mushroom::endContact(PhySprite *other, b2Contact* contact) {
-	if (other->getPhyType() == BRICK) {
-		if (other == underBricks) {
-			underBricks = 0;
-		}
-	} else if (other->getPhyType() == BROADSIDE) {
+	if (other->getPhyType() == BROADSIDE) {
 		touchEdge = 0;
 	}
-
 }

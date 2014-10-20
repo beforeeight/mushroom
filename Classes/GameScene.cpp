@@ -332,12 +332,8 @@ void GameLayer::gameover() {
 }
 
 void GameLayer::update(float delta) {
-
-	float32 timeStep = CCDirector::sharedDirector()->getAnimationInterval();
-	int32 velocityIterations = 6;
-	int32 positionIterations = 2;
 	b2World *world = PhyWorld::shareWorld();
-	world->Step(timeStep, velocityIterations, positionIterations);
+	world->Step(delta, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
 }
 
 void GameLayer::increateScore(CCObject *p_sender, unsigned int score) {

@@ -149,18 +149,19 @@ PHY_TYPE Bricks::getPhyType() {
 }
 
 void Bricks::beginContact(PhySprite *other, b2Contact* contact) {
-	if (other->getPhyType() == MUSHROOM && this->score > 0) {
+	if (other->getPhyType() == MUSHROOM) {
 		b2Manifold *manifold = contact->GetManifold();
 		b2ManifoldPoint mp1 = manifold->points[0];
 		b2ManifoldPoint mp2 = manifold->points[1];
 		if (mp1.localPoint.y == mp2.localPoint.y) { //底边碰撞
 			if (this->getPositionY() < other->getPositionY()) { //蘑菇在上边
-				LOCAL_CONTEXT->increaseScore(score);
-				score = 0;
-				b2JointDef jointDef;
-				jointDef.type = e_weldJoint;
-				jointDef.bodyA = this->b2PhyBody;
-				jointDef.bodyB = other->getB2Body();
+				if (this->score > 0) {
+					LOCAL_CONTEXT->increaseScore(score);
+					score = 0;
+				}
+				b2FrictionJointDef jointDef;
+				jointDef.Initialize(this->b2PhyBody, other->getB2Body(),
+						b2Vec2_zero);
 				joint = PhyWorld::shareWorld()->CreateJoint(&jointDef);
 			}
 		}
@@ -304,8 +305,8 @@ void HorizontalBricks::onRunning() {
 
 /* VerticalBricks */
 VerticalBricks::VerticalBricks() :
-		speed(VER_BRICKS_SPEED), amplitude(VER_AMPLITUDE), originalY(
-				POS_JUNCTION) {
+		v0(VER_BRICKS_SPEED), accelerated(0), originalY(POS_JUNCTION), deltaUpdate(
+				0) {
 	score = 2;
 }
 
@@ -325,15 +326,18 @@ VerticalBricks* VerticalBricks::create(int num) {
 }
 
 void VerticalBricks::update(float delta) {
-	if (this->getPositionY() >= originalY + ccpy(amplitude)) {
-		b2Vec2 speedVec = b2PhyBody->GetLinearVelocity();
-		speedVec.y = -abs(speed);
-		b2PhyBody->SetLinearVelocity(speedVec);
-	} else if (this->getPositionY() <= originalY - ccpy(amplitude)) {
-		b2Vec2 speedVec = b2PhyBody->GetLinearVelocity();
-		speedVec.y = abs(speed);
-		b2PhyBody->SetLinearVelocity(speedVec);
+	deltaUpdate += delta;
+	if (this->getPositionY() > originalY && accelerated > 0) {
+		accelerated = -abs(accelerated);
+		deltaUpdate = 0;
+	} else if (this->getPositionY() < originalY && accelerated < 0) {
+		accelerated = abs(accelerated);
+		deltaUpdate = 0;
 	}
+	b2Vec2 v0Vec = this->b2PhyBody->GetLinearVelocity();
+	float v1 = v0Vec.y + accelerated * delta;
+	v0Vec.y = v1;
+	this->b2PhyBody->SetLinearVelocity(v0Vec);
 	Bricks::update(delta);
 }
 
@@ -341,7 +345,9 @@ void VerticalBricks::onRunning() {
 	if (b2PhyBody) {
 		originalY = this->getPositionY();
 		b2Vec2 v = b2PhyBody->GetLinearVelocity();
-		v.y = speed;
+		v.y = v0;
+		accelerated = -abs(VER_ACCELERATED);
 		b2PhyBody->SetLinearVelocity(v);
+
 	}
 }

@@ -8,9 +8,9 @@
 #ifndef MUSHROOM_H_
 #define MUSHROOM_H_
 
-#define MUSHROOM_FORWARD_SPEED 7
-#define MUSHROOM_BACK_SPEED -5
-#define MUSHROOM_JUMP_VELOCITY 10.0f
+#define MUSHROOM_FORWARD_SPEED 5
+#define MUSHROOM_BACK_SPEED -7
+#define MUSHROOM_JUMP_VELOCITY 8.0f
 #define ACC_PER_SEC 0.1f
 
 #include "PhySprite.h"
@@ -54,22 +54,18 @@ protected:
 
 	int touchEdge;
 
-	void forward();
+	void keepForward(float friction);
 
-	void back();
-
-	void naturalSpeed();
+	void keepBack(float friction);
 
 	void stop();
 
 	virtual void createPhyBody();
 
 private:
-	float forwardSpeed, backSpeed, accPerSec;
+	bool jumping;
 
-	float vecLastTime;
-
-	Bricks *underBricks;
+	float forwardSpeed, backSpeed, accPerSec, contactFriction;
 
 	void gameover();
 

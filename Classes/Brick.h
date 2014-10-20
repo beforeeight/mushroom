@@ -14,7 +14,7 @@
 #define BRICKS_SPEED 2
 #define HOR_BRICKS_SPEED_SCALE 1.8f
 #define VER_BRICKS_SPEED 5.0f
-#define VER_AMPLITUDE 0.1f
+#define VER_ACCELERATED 5.0f
 
 #define TEXTURE_BRICK "item_cubic.png"
 
@@ -136,7 +136,7 @@ protected:
 	virtual void onRunning();
 
 private:
-	float speed, amplitude, originalY;
+	float v0, accelerated, originalY, deltaUpdate;
 };
 /*--------- Class BatchBrick --------*/
 class BrickEmitter {

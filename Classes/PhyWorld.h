@@ -10,6 +10,9 @@
 #include <Box2D/Box2D.h>
 #include "Resources.h"
 
+#define VELOCITY_ITERATIONS 6
+#define POSITION_ITERATIONS 2
+#define WORLD_GRAVITY 9.8
 
 class PhyWorld {
 public:
