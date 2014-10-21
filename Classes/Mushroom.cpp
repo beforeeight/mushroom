@@ -161,7 +161,11 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 		if (mp1.localPoint.x == mp2.localPoint.x) { //侧边碰撞
 			b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
 			v.x = -v.x;
-			this->b2PhyBody->SetLinearVelocity(v);
+			float x = -v.x;
+			this->b2PhyBody->ApplyLinearImpulse(
+					b2Vec2(2 * x * this->b2PhyBody->GetMass(), 0),
+					this->b2PhyBody->GetLocalCenter());
+			//this->b2PhyBody->SetLinearVelocity(v);
 		} else if (mp1.localPoint.y == mp2.localPoint.y) { //底边碰撞
 			if (this->getPositionY() > other->getPositionY()) { //蘑菇在上边
 				this->jumping = false;
@@ -177,7 +181,10 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 
 void Mushroom::PreSolve(PhySprite *other, b2Contact* contact,
 		const b2Manifold* oldManifold) {
-	if (!jumping) { //脚底下有板子
+	b2Manifold *manifold = contact->GetManifold();
+	b2ManifoldPoint mp1 = manifold->points[0];
+	b2ManifoldPoint mp2 = manifold->points[1];
+	if (!jumping && mp1.localPoint.y == mp2.localPoint.y) { //脚底下有板子
 		float friction = contact->GetFriction();
 		switch (this->vec) {
 		case vec_forward:
