@@ -39,14 +39,6 @@ b2World* PhyWorld::shareWorld(void) {
 				| b2Draw::e_jointBit;
 		_debugDraw->SetFlags(flags);
 		world->SetDebugDraw(_debugDraw);
-
-		// draw();
-//
-
-//		world->DrawDebugData();
-		// Prepare for simulation. Typically we use a time step of 1/60 of a
-		// second (60Hz) and 10 iterations. This provides a high quality simulation
-		// in most game scenarios.
 	}
 	return world;
 }

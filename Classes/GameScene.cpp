@@ -38,13 +38,7 @@ GameLayer::~GameLayer() {
 }
 
 void GameLayer::draw() {
-	//glDisable(GL_TEXTURE_2D);
-	//glDisableClientState(GL_COLOR_ARRAY);
-	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	PhyWorld::shareWorld()->DrawDebugData(); //这个一定要写
-	//glEnable(GL_TEXTURE_2D);
-	//glEnableClientState(GL_COLOR_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	PhyWorld::shareWorld()->DrawDebugData();
 }
 
 bool GameLayer::init() {
@@ -69,8 +63,8 @@ bool GameLayer::init() {
 						LOCAL_RESOURCES->valueByKey("font")->getCString(),
 						LOCAL_RESOURCES->valueByKey("font_size")->floatValue());
 		score->setColor(LOCAL_CONTEXT->getFontColor());
-		score->setAnchorPoint(ccp(1, 1));
-		score->setPosition(ccpp(0.5,0.5));
+		score->setAnchorPoint(ccp(1, 0.5));
+		score->setPosition(ccpp(0.48,0.45));
 		this->addChild(score, 0, TAG_SCORE);
 		LOCAL_CONTEXT->setScoreTarget(score,
 				(ScoreFunc) (&GameLayer::increateScore));
@@ -130,6 +124,76 @@ bool GameLayer::init() {
 		jumpBtn->setAnchorPoint(ccp(0.5, 0.5));
 		jumpBtn->setPosition(ccpp(0.35,-0.2));
 		this->addChild(jumpBtn, 9, TAG_BTN_JUMP);
+
+		/*-- 水中的鱼 --*/
+		float width = LOCAL_RESOLUTION_WIDTH / 2;
+		CCSprite *fish1 = CCSprite::create("bg_fish_3.png"); //红鱼
+		CCSprite *fish2 = CCSprite::create("bg_fish_2.png"); //黄鱼
+		CCSprite *fish3 = CCSprite::create("bg_fish_1.png"); //章鱼
+		fish1->setAnchorPoint(ccp(0.5, 0.5));
+		fish2->setAnchorPoint(ccp(0.5, 0.5));
+		fish3->setAnchorPoint(ccp(0.5, 0.5));
+		fish1->setPosition(
+				ccpp(0.5,-0.36) + ccp(fish1->getContentSize().width, 0));
+		fish2->setPosition(
+				ccpp(0.5,-0.46) + ccp(fish2->getContentSize().width, 0));
+		fish3->setPosition(
+				ccpp(0.5,-0.4) + ccp(fish3->getContentSize().width, 0));
+		this->addChild(fish1);
+		this->addChild(fish2);
+		this->addChild(fish3);
+
+		fish1->runAction(
+				CCRepeatForever::create(
+						CCSequence::create(
+								CCMoveTo::create(5,
+										ccp(
+												-width
+														- fish1->getContentSize().width,
+												fish1->getPositionY())),
+								CCFlipX::create(true),
+								CCDelayTime::create(4.0f),
+								CCMoveTo::create(5,
+										ccp(
+												width
+														+ fish1->getContentSize().width,
+												fish1->getPositionY())),
+								CCFlipX::create(false), NULL)));
+
+		fish2->runAction(
+				CCRepeatForever::create(
+						CCSequence::create(CCDelayTime::create(1.0f),
+								CCMoveTo::create(5,
+										ccp(
+												-width
+														- fish2->getContentSize().width,
+												fish2->getPositionY())),
+								CCFlipX::create(true),
+								CCDelayTime::create(2.0f),
+								CCMoveTo::create(5,
+										ccp(
+												width
+														+ fish2->getContentSize().width,
+												fish2->getPositionY())),
+								CCFlipX::create(false),
+								CCDelayTime::create(1.0f), NULL)));
+
+		fish3->runAction(
+				CCRepeatForever::create(
+						CCSequence::create(CCDelayTime::create(2.0f),
+								CCMoveTo::create(5,
+										ccp(
+												-width
+														- fish3->getContentSize().width,
+												fish3->getPositionY())),
+								CCFlipX::create(true),
+								CCMoveTo::create(5,
+										ccp(
+												width
+														+ fish3->getContentSize().width,
+												fish3->getPositionY())),
+								CCFlipX::create(false),
+								CCDelayTime::create(2.0f), NULL)));
 		draw();
 		return true;
 
@@ -258,8 +322,8 @@ CCLayer * GameLayer::createPauseButtonLayer() {
 			("btn_small.png"));
 	CCSprite *pausetxt = CCSprite::create("btn_pause.png");
 	pausebg->setTarget(this, menu_selector(GameLayer::onPauseItem));
-	pausebg->setAnchorPoint(ccp(0, 1));
-	pausebg->setPosition(ccpp(-0.49, 0.49));
+	pausebg->setAnchorPoint(ccp(0, 0.5));
+	pausebg->setPosition(ccpp(-0.48, 0.45));
 	pausetxt->setPosition(
 			ccp(pausebg->getContentSize().width / 2,
 					pausebg->getContentSize().height / 2));
