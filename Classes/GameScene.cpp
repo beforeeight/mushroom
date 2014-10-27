@@ -346,15 +346,15 @@ void GameLayer::createPauseLayer() {
 	CCMenuItemImage *resumebg = CCMenuItemImage::create(("btn_big.png"),
 			("btn_big.png"));
 	resumebg->setTarget(this, menu_selector(GameLayer::onResumeItem));
-	CCMenuItemFont *resumetxt = CCMenuItemFont::create(
-			LOCAL_RESOURCES->valueByKey("i18n_resume")->getCString());
+	CCNode *resumetxt = CCLabelBMFont::create(
+			LOCAL_RESOURCES->valueByKey("i18n_resume")->getCString(),
+			"fonts.fnt");
 	resumebg->setAnchorPoint(ccp(0.5, 0.5));
 	resumebg->setPosition(ccpp(0, 0));
 	resumetxt->setPosition(
 			ccp(resumebg->getContentSize().width / 2,
 					resumebg->getContentSize().height / 2));
 	resumetxt->setAnchorPoint(ccp(0.5, 0.5));
-	resumetxt->setColor(context->getFontColor());
 	resumebg->addChild(resumetxt);
 	menu->addChild(resumebg);
 
@@ -362,15 +362,15 @@ void GameLayer::createPauseLayer() {
 	CCMenuItemImage *backbg = CCMenuItemImage::create(("btn_big.png"),
 			("btn_big.png"));
 	backbg->setTarget(this, menu_selector(GameLayer::onBackItem));
-	CCMenuItemFont *backtxt = CCMenuItemFont::create(
-			LOCAL_RESOURCES->valueByKey("i18n_back")->getCString());
+	CCNode *backtxt = CCLabelBMFont::create(
+			LOCAL_RESOURCES->valueByKey("i18n_back")->getCString(),
+			"fonts.fnt");
 	backbg->setAnchorPoint(ccp(0.5, 0.5));
 	backbg->setPosition(ccpp(0, -0.12));
 	backtxt->setPosition(
 			ccp(backbg->getContentSize().width / 2,
 					backbg->getContentSize().height / 2));
 	backtxt->setAnchorPoint(ccp(0.5, 0.5));
-	backtxt->setColor(context->getFontColor());
 	backbg->addChild(backtxt);
 	menu->addChild(backbg);
 

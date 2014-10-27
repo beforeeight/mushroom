@@ -13,14 +13,19 @@ using namespace CocosDenshion;
 
 const Resource iphone5Resource = { cocos2d::CCSizeMake(640, 1136), "iphone" };
 const Resource iphone4Resource = { cocos2d::CCSizeMake(640, 960), "iphone" };
+const Resource nexusResource = { cocos2d::CCSizeMake(768, 1184), "iphone" };
 
 #define ASPECT_RATIO_4_5 (640.0f/960.f+640.0f/1136.0f)/2
+#define ASPECT_RATIO_N_5 (768.0f/1184.f+640.0f/1136.0f)/2
+#define ASPECT_RATIO_4_N (640.0f/960.f+768.0f/1184.0f)/2
 
 LocalResources::LocalResources() {
 	CCEGLView* pEGLView = CCEGLView::sharedOpenGLView();
 	CCSize frameSize = pEGLView->getFrameSize();
-	if (frameSize.width / frameSize.height > ASPECT_RATIO_4_5) {
-		resource = iphone4Resource;
+	if (frameSize.width / frameSize.height > ASPECT_RATIO_4_N) {
+		resource = iphone5Resource;
+	} else if (frameSize.width / frameSize.height > ASPECT_RATIO_N_5) {
+		resource = iphone5Resource;
 	} else {
 		resource = iphone5Resource;
 	}

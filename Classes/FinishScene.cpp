@@ -24,18 +24,14 @@ bool FinishLayer::init() {
 	if (CCMenu::init()) {
 
 		/*-- 文字 --*/
-		CCNode *gameoverSprite = CCLabelBMFont::create(
-				LOCAL_RESOURCES->valueByKey("i18n_gameover")->getCString(),
-				"fonts.fnt");
-		CCMenuItemSprite *gameover = CCMenuItemSprite::create(gameoverSprite,
-				gameoverSprite, gameoverSprite);
+		CCMenuItem *gameover = CCMenuItemImage::create("result_gameover.png",
+				"result_gameover.png");
 		gameover->setAnchorPoint(ccp(0.5, 0.5));
 		gameover->setPosition(ccpp(0, 0.32));
 		this->addChild(gameover);
 
-		CCMenuItemFont *scoreLabel = CCMenuItemFont::create(
-				LOCAL_RESOURCES->valueByKey("i18n_score")->getCString());
-		scoreLabel->setColor(LOCAL_CONTEXT->getFontColor());
+		CCMenuItem *scoreLabel = CCMenuItemImage::create("result_score.png",
+				"result_score.png");
 		scoreLabel->setAnchorPoint(ccp(0, 0.5));
 
 		CCMenuItemFont *score =
@@ -45,9 +41,8 @@ bool FinishLayer::init() {
 		score->setColor(LOCAL_CONTEXT->getFontColor());
 		score->setAnchorPoint(ccp(0, 0.5));
 
-		CCMenuItemFont *highScoreLabel = CCMenuItemFont::create(
-				LOCAL_RESOURCES->valueByKey("i18n_highscore")->getCString());
-		highScoreLabel->setColor(LOCAL_CONTEXT->getFontColor());
+		CCMenuItem *highScoreLabel = CCMenuItemImage::create("result_best.png",
+				"result_best.png");
 		highScoreLabel->setAnchorPoint(ccp(0, 0.5));
 
 		CCMenuItemFont *highScore =

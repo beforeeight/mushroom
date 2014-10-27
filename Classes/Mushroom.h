@@ -54,9 +54,9 @@ protected:
 
 	int touchEdge;
 
-	void keepForward(float friction);
+	void keepForward(float offset);
 
-	void keepBack(float friction);
+	void keepBack(float offset);
 
 	void stop();
 

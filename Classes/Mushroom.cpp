@@ -121,16 +121,16 @@ void Mushroom::setVec(MushroomVec vec) {
 	this->vec = vec;
 }
 
-void Mushroom::keepForward(float friction) {
+void Mushroom::keepForward(float offset) {
 //	float x = this->b2PhyBody->GetMass() * WORLD_GRAVITY * friction;
 //	this->b2PhyBody->ApplyForceToCenter(b2Vec2(x, 0));
-	this->setSpeedX(MUSHROOM_FORWARD_SPEED);
+	this->setSpeedX(MUSHROOM_FORWARD_SPEED + offset);
 }
 
-void Mushroom::keepBack(float friction) {
+void Mushroom::keepBack(float offset) {
 //	float x = this->b2PhyBody->GetMass() * WORLD_GRAVITY * friction;
 //	this->b2PhyBody->ApplyForceToCenter(b2Vec2(-x, 0));
-	this->setSpeedX(MUSHROOM_BACK_SPEED);
+	this->setSpeedX(MUSHROOM_BACK_SPEED + offset);
 }
 
 void Mushroom::stop() {
@@ -165,7 +165,7 @@ void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 			this->b2PhyBody->ApplyLinearImpulse(
 					b2Vec2(2 * x * this->b2PhyBody->GetMass(), 0),
 					this->b2PhyBody->GetLocalCenter());
-			//this->b2PhyBody->SetLinearVelocity(v);
+			this->b2PhyBody->SetLinearVelocity(v);
 		} else if (mp1.localPoint.y == mp2.localPoint.y) { //底边碰撞
 			if (this->getPositionY() > other->getPositionY()) { //蘑菇在上边
 				this->jumping = false;
@@ -188,10 +188,10 @@ void Mushroom::PreSolve(PhySprite *other, b2Contact* contact,
 		float friction = contact->GetFriction();
 		switch (this->vec) {
 		case vec_forward:
-			keepForward(friction);
+			keepForward(other->getB2Body()->GetLinearVelocity().x);
 			break;
 		case vec_back:
-			keepBack(friction);
+			keepBack(other->getB2Body()->GetLinearVelocity().x);
 			break;
 		case vec_nature:
 			break;
