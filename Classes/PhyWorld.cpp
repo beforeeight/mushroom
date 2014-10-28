@@ -34,11 +34,11 @@ b2World* PhyWorld::shareWorld(void) {
 		world->SetContinuousPhysics(true);
 
 //		b2DebugDraw
-		_debugDraw = new GLESDebugDraw(32.0f);
-		uint32 flags = b2Draw::e_shapeBit | b2Draw::e_aabbBit
-				| b2Draw::e_jointBit;
-		_debugDraw->SetFlags(flags);
-		world->SetDebugDraw(_debugDraw);
+//		_debugDraw = new GLESDebugDraw(32.0f);
+//		uint32 flags = b2Draw::e_shapeBit | b2Draw::e_aabbBit
+//				| b2Draw::e_jointBit;
+//		_debugDraw->SetFlags(flags);
+//		world->SetDebugDraw(_debugDraw);
 	}
 	return world;
 }

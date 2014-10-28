@@ -38,7 +38,7 @@ GameLayer::~GameLayer() {
 }
 
 void GameLayer::draw() {
-	PhyWorld::shareWorld()->DrawDebugData();
+	//PhyWorld::shareWorld()->DrawDebugData();
 }
 
 bool GameLayer::init() {
