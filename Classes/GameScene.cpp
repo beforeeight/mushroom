@@ -335,7 +335,6 @@ CCLayer * GameLayer::createPauseButtonLayer() {
 }
 
 void GameLayer::createPauseLayer() {
-	Context *context = Context::sharedContext();
 	CCSize s = CCDirector::sharedDirector()->getWinSize();
 	/* 半透明层 */
 	CCLayerColor* pauseLayer = CCLayerColor::create();

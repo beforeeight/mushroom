@@ -67,7 +67,7 @@ protected:
 private:
 	bool jumping;
 
-	float forwardSpeed, backSpeed, accPerSec, contactFriction;
+	float forwardSpeed, backSpeed, accPerSec, contactFriction, over;
 
 	void gameover();
 

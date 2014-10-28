@@ -15,7 +15,7 @@ static Mushroom *currentMushroom = NULL;
 Mushroom::Mushroom() :
 		vec(vec_nature), touchEdge(0), jumping(false), forwardSpeed(
 				MUSHROOM_FORWARD_SPEED), backSpeed(MUSHROOM_BACK_SPEED), accPerSec(
-				ACC_PER_SEC), contactFriction(0) {
+				ACC_PER_SEC), contactFriction(0), over(false) {
 	// TODO Auto-generated constructor stub
 }
 
@@ -73,9 +73,12 @@ bool Mushroom::isVec(MushroomVec vec) {
 }
 
 void Mushroom::gameover() {
-	this->getParent()->removeAllChildren();
-	CCDirector::sharedDirector()->replaceScene(
-			CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
+	if (!over) {
+		over = true;
+		//this->getParent()->removeAllChildren();
+		CCDirector::sharedDirector()->replaceScene(
+				CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
+	}
 }
 
 void Mushroom::setSpeed(b2Vec2 vec) {
@@ -96,8 +99,6 @@ void Mushroom::setSpeedX(float speed) {
 void Mushroom::update(float delta) {
 	float y = this->getPositionY();
 	if (y < -LOCAL_RESOLUTION.height / 2) {
-		this->stopAllActions();
-		this->unscheduleUpdate();
 		gameover();
 		return;
 	}
@@ -152,9 +153,9 @@ void Mushroom::jump() {
 	if (!jumping) {
 		jumping = true;
 		float mass = this->b2PhyBody->GetMass();
-		b2Vec2 curVec = this->b2PhyBody->GetLinearVelocity();
-		curVec.y = 0;
-		//this->b2PhyBody->SetLinearVelocity(curVec);
+//		b2Vec2 curVec = this->b2PhyBody->GetLinearVelocity();
+//		curVec.y = 0;
+//		this->b2PhyBody->SetLinearVelocity(curVec);
 		this->b2PhyBody->ApplyLinearImpulse(
 				b2Vec2(0, mass * MUSHROOM_JUMP_VELOCITY),
 				this->b2PhyBody->GetLocalCenter());
@@ -194,7 +195,6 @@ void Mushroom::PreSolve(PhySprite *other, b2Contact* contact,
 	b2ManifoldPoint mp1 = manifold->points[0];
 	b2ManifoldPoint mp2 = manifold->points[1];
 	if (!jumping && mp1.localPoint.y == mp2.localPoint.y) { //脚底下有板子
-		float friction = contact->GetFriction();
 		switch (this->vec) {
 		case vec_forward:
 			keepForward(other->getB2Body()->GetLinearVelocity().x);
