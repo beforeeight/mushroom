@@ -159,10 +159,14 @@ void Bricks::beginContact(PhySprite *other, b2Contact* contact) {
 					LOCAL_CONTEXT->increaseScore(score);
 					score = 0;
 				}
-				b2FrictionJointDef jointDef;
-				jointDef.Initialize(this->b2PhyBody, other->getB2Body(),
-						b2Vec2_zero);
-				joint = PhyWorld::shareWorld()->CreateJoint(&jointDef);
+				if (!joint) {
+					b2FrictionJointDef jointDef;
+					jointDef.Initialize(this->b2PhyBody, other->getB2Body(),
+							b2Vec2_zero);
+					CCLog("111111b2world the return of function IsLocked() is %d",PhyWorld::shareWorld()->IsLocked());
+					joint = PhyWorld::shareWorld()->CreateJoint(&jointDef);
+					CCLog("111111b2world the return of function IsLocked() is %d",PhyWorld::shareWorld()->IsLocked());
+				}
 			}
 		}
 	}

@@ -11,7 +11,7 @@
 #include "GLES-Render.h"
 
 static b2World *world = NULL;
-static GLESDebugDraw *_debugDraw = NULL;
+//static GLESDebugDraw *_debugDraw = NULL;
 
 //static GLESDebugDraw *_debugDraw = NULL;
 PhyWorld::PhyWorld() {
@@ -48,8 +48,8 @@ void PhyWorld::purgeB2World() {
 		delete (world);
 		world = NULL;
 	}
-	if (_debugDraw) {
-		delete (_debugDraw);
-		_debugDraw = NULL;
-	}
+//	if (_debugDraw) {
+//		delete (_debugDraw);
+//		_debugDraw = NULL;
+//	}
 }
