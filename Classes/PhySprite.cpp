@@ -12,8 +12,7 @@ PhySprite::PhySprite() :
 }
 
 PhySprite::~PhySprite() {
-	if (b2PhyBody) {
-		CCLog("release delete body %d", this->getPhyType());
+	if (b2PhyBody && PhyWorld::shareWorld()->GetBodyCount() > 0) {
 		PhyWorld::shareWorld()->DestroyBody(this->b2PhyBody);
 	}
 }
