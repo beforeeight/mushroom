@@ -76,11 +76,11 @@ bool GameLayer::init() {
 		PhySprite::initPhySprite(*water, false);
 		this->addChild(water);
 
+		/*-- 左右边界 --*/
 		CCPoint ltp = ccpp(-0.5,0.5);
 		CCPoint lbp = ccpp(-0.5,-0.5);
 		CCPoint rtp = ccpp(0.5,0.5);
 		CCPoint rbp = ccpp(0.5,-0.5);
-//
 		b2BodyDef leftBodyDef;
 		leftBodyDef.position.Set(0, 0);
 		leftBodyDef.type = b2_staticBody;
@@ -104,11 +104,12 @@ bool GameLayer::init() {
 		rightES->setPhyType(BROADSIDE);
 		this->addChild(rightES);
 
+		/*-- 蘑菇 --*/
 		Mushroom *mushroom = Mushroom::create();
 		mushroom->setPosition(ccpp(-0.2,0.5));
 		PhySprite::initPhySprite(*mushroom);
 		this->addChild(mushroom, 10, TAG_MUSHROOM);
-
+		/*-- 砖板 --*/
 		this->brickEmitter->initBricks();
 
 		/* control button */

@@ -64,11 +64,11 @@ public:
 	}
 
 protected:
+	Bricks *previous, *next;
+
 	unsigned int score;
 
 	float movingSpeed;
-
-	Bricks *previous, *next;
 
 	virtual void createPhyBody();
 
@@ -84,11 +84,9 @@ private:
 
 	BrickEmitter *emitter;
 
-	b2Vec2 linearVelocity;
-
-	b2Joint* joint;
-
 	BrickStatus status;
+
+	b2Vec2 linearVelocity;
 
 	void updateStatus();
 

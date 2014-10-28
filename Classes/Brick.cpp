@@ -6,6 +6,7 @@
  */
 
 #include "Brick.h"
+#include "Mushroom.h"
 
 USING_NS_CC;
 
@@ -112,8 +113,9 @@ bool Brick::init() {
 
 /*------------ Group Brick with b2Body ----------*/
 Bricks::Bricks() :
-		score(1), movingSpeed(BRICKS_SPEED), previous(0), next(0), emitter(0), status(
-				brick_ready), joint(0) {
+		previous(0), next(0), score(1), movingSpeed(BRICKS_SPEED), emitter(0), status(
+				brick_ready), linearVelocity(b2Vec2_zero) {
+
 }
 
 Bricks::~Bricks() {
@@ -122,9 +124,6 @@ Bricks::~Bricks() {
 	}
 	if (next) {
 		next->previous = 0;
-	}
-	if (joint) {
-		PhyWorld::shareWorld()->DestroyJoint(joint);
 	}
 }
 
@@ -159,14 +158,6 @@ void Bricks::beginContact(PhySprite *other, b2Contact* contact) {
 					LOCAL_CONTEXT->increaseScore(score);
 					score = 0;
 				}
-//				if (!joint) {
-//					b2FrictionJointDef jointDef;
-//					jointDef.Initialize(this->b2PhyBody, other->getB2Body(),
-//							b2Vec2_zero);
-//					CCLog("111111b2world the return of function IsLocked() is %d",PhyWorld::shareWorld()->IsLocked());
-//					joint = PhyWorld::shareWorld()->CreateJoint(&jointDef);
-//					CCLog("111111b2world the return of function IsLocked() is %d",PhyWorld::shareWorld()->IsLocked());
-//				}
 			}
 		}
 	}

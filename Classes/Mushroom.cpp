@@ -10,6 +10,8 @@
 
 USING_NS_CC;
 
+static Mushroom *currentMushroom = NULL;
+
 Mushroom::Mushroom() :
 		vec(vec_nature), touchEdge(0), jumping(false), forwardSpeed(
 				MUSHROOM_FORWARD_SPEED), backSpeed(MUSHROOM_BACK_SPEED), accPerSec(
@@ -26,10 +28,15 @@ bool Mushroom::init() {
 			CCTextureCache::sharedTextureCache()->textureForKey(
 					"mushroom.png"))) {
 		this->setAnchorPoint(ccp(0.5, 0.5));
+		currentMushroom = this;
 		return true;
 	} else {
 		return false;
 	}
+}
+
+Mushroom* Mushroom::getCurrentMushroom() {
+	return currentMushroom;
 }
 
 PHY_TYPE Mushroom::getPhyType() {
@@ -89,6 +96,8 @@ void Mushroom::setSpeedX(float speed) {
 void Mushroom::update(float delta) {
 	float y = this->getPositionY();
 	if (y < -LOCAL_RESOLUTION.height / 2) {
+		this->stopAllActions();
+		this->unscheduleUpdate();
 		gameover();
 		return;
 	}

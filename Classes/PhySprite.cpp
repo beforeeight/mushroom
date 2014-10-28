@@ -12,7 +12,10 @@ PhySprite::PhySprite() :
 }
 
 PhySprite::~PhySprite() {
-	PhyWorld::shareWorld()->DestroyBody(this->b2PhyBody);
+	if (b2PhyBody) {
+		CCLog("release delete body %d", this->getPhyType());
+		PhyWorld::shareWorld()->DestroyBody(this->b2PhyBody);
+	}
 }
 
 void PhySprite::initPhySprite(PhySprite &sprite, bool update) {
@@ -32,9 +35,8 @@ bool PhySprite::initWithBody(b2Body *body) {
 		b2PhyBody = body;
 		b2PhyBody->SetUserData(this);
 		this->setAnchorPoint(ccp(0.5, 0.5));
-		this->setPosition(
-				ccp(b2c(b2PhyBody->GetPosition().x),
-						b2c(b2PhyBody->GetPosition().y)));
+		this->setPosition(ccp(b2c(b2PhyBody->GetPosition().x),
+		b2c(b2PhyBody->GetPosition().y)));
 		return true;
 	} else {
 		return false;
@@ -59,9 +61,8 @@ b2Body* PhySprite::getB2Body() {
 
 void PhySprite::update(float delta) {
 	if (b2PhyBody) {
-		this->setPosition(
-				ccp(b2c(b2PhyBody->GetPosition().x),
-						b2c(b2PhyBody->GetPosition().y)));
+		this->setPosition(ccp(b2c(b2PhyBody->GetPosition().x),
+		b2c(b2PhyBody->GetPosition().y)));
 		this->setRotation(-1 * CC_RADIANS_TO_DEGREES(b2PhyBody->GetAngle()));
 	}
 }

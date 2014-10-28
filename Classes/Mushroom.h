@@ -33,6 +33,8 @@ public:
 
 	CREATE_FUNC (Mushroom)
 
+	static Mushroom* getCurrentMushroom();
+
 	virtual void update(float delta);
 
 	void setVec(MushroomVec vec);
