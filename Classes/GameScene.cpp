@@ -212,6 +212,7 @@ void GameLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent) {
 			CCPoint point = touch->getLocation()
 					- ccp(LOCAL_RESOLUTION.width / 2,
 							LOCAL_RESOLUTION.height / 2);
+			CCLog("GameLayer::ccTouchesBegan  x:y = %f:%f", point.x, point.y);
 			if (this->getChildByTag(TAG_BTN_RIGHT)->boundingBox().containsPoint(
 					point)) {
 				mushroom->setVec(vec_forward);
