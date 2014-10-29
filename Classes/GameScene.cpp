@@ -154,7 +154,7 @@ bool GameLayer::init() {
 												fish1->getPositionY())),
 								CCFlipX::create(true),
 								CCDelayTime::create(4.0f),
-								CCMoveTo::create(5,
+								CCMoveTo::create(3,
 										ccp(
 												width
 														+ fish1->getContentSize().width,
@@ -182,7 +182,7 @@ bool GameLayer::init() {
 		fish3->runAction(
 				CCRepeatForever::create(
 						CCSequence::create(CCDelayTime::create(2.0f),
-								CCMoveTo::create(5,
+								CCMoveTo::create(4,
 										ccp(
 												-width
 														- fish3->getContentSize().width,
@@ -212,7 +212,6 @@ void GameLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent) {
 			CCPoint point = touch->getLocation()
 					- ccp(LOCAL_RESOLUTION.width / 2,
 							LOCAL_RESOLUTION.height / 2);
-			CCLog("GameLayer::ccTouchesBegan  x:y = %f:%f", point.x, point.y);
 			if (this->getChildByTag(TAG_BTN_RIGHT)->boundingBox().containsPoint(
 					point)) {
 				mushroom->setVec(vec_forward);

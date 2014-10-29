@@ -12,7 +12,7 @@
 
 #define VELOCITY_ITERATIONS 6
 #define POSITION_ITERATIONS 2
-#define WORLD_GRAVITY 9.8
+#define WORLD_GRAVITY 20
 
 class PhyWorld {
 public:
