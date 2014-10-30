@@ -11,10 +11,10 @@
 #include "PhySprite.h"
 #include "PhyWorld.h"
 
-#define BRICKS_SPEED 2
-#define HOR_BRICKS_SPEED_SCALE 1.8f
-#define VER_BRICKS_SPEED 5.0f
-#define VER_ACCELERATED 5.0f
+#define BRICKS_SPEED 2 //高台从右向左的移送速度
+#define HOR_BRICKS_SPEED_SCALE 1.8f //左右移动的高台，移动速度的放大倍数，他的速度=BRICKS_SPEED*HOR_BRICKS_SPEED_SCALE
+#define VER_BRICKS_SPEED 5.0f //上下移动的高台的初始的向上移动速度，与下面的值（VER_ACCELERATED）配合会影响高台上下的振幅
+#define VER_ACCELERATED 5.0f  //上下移动的高台的加速度，这个速度不要大于“重力加速度”，否则蘑菇会产生完全失重状态
 
 #define TEXTURE_BRICK "item_cubic.png"
 

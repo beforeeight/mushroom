@@ -10,9 +10,9 @@
 #include <Box2D/Box2D.h>
 #include "Resources.h"
 
-#define VELOCITY_ITERATIONS 6
-#define POSITION_ITERATIONS 2
-#define WORLD_GRAVITY 20
+#define VELOCITY_ITERATIONS 6 //不要改
+#define POSITION_ITERATIONS 2 //不要改
+#define WORLD_GRAVITY 20 //世界的重力加速度，地球上是9.8
 
 class PhyWorld {
 public:
