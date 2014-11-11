@@ -11,7 +11,7 @@
 #include "GLES-Render.h"
 
 static b2World *world = NULL;
-//static GLESDebugDraw *_debugDraw = NULL;
+static GLESDebugDraw *_debugDraw = NULL;
 
 //static GLESDebugDraw *_debugDraw = NULL;
 PhyWorld::PhyWorld() {
@@ -32,13 +32,13 @@ b2World* PhyWorld::shareWorld(void) {
 		world->SetContactListener(new MushroomContactListener());
 
 		world->SetContinuousPhysics(true);
-
-//		b2DebugDraw
+//#ifdef DEBUG
 //		_debugDraw = new GLESDebugDraw(32.0f);
 //		uint32 flags = b2Draw::e_shapeBit | b2Draw::e_aabbBit
 //				| b2Draw::e_jointBit;
 //		_debugDraw->SetFlags(flags);
 //		world->SetDebugDraw(_debugDraw);
+//#endif
 	}
 	return world;
 }
@@ -48,8 +48,10 @@ void PhyWorld::purgeB2World() {
 		delete (world);
 		world = NULL;
 	}
+//#ifdef DEBUG
 //	if (_debugDraw) {
 //		delete (_debugDraw);
 //		_debugDraw = NULL;
 //	}
+//#endif
 }

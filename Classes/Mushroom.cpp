@@ -14,8 +14,9 @@ static Mushroom *currentMushroom = NULL;
 
 Mushroom::Mushroom() :
 		vec(vec_nature), touchEdge(0), jumping(false), forwardSpeed(
-				MUSHROOM_FORWARD_SPEED), backSpeed(MUSHROOM_BACK_SPEED), accPerSec(
-				ACC_PER_SEC), contactFriction(0), over(false) {
+				MUSHROOM_FORWARD_SPEED), backSpeed(MUSHROOM_BACK_SPEED), jumping_vec(
+				MUSHROOM_JUMP_VELOCITY), accPerSec(ACC_PER_SEC), contactFriction(
+				0), over(false) {
 	// TODO Auto-generated constructor stub
 }
 
@@ -52,11 +53,22 @@ void Mushroom::createPhyBody() {
 	c2b(this->getPosition().y));
 	b2PhyBody = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
 
+	float width = c2b(this->getContentSize().width / 2);
+	float height = c2b(this->getContentSize().height / 2);
 	b2PolygonShape b2Shape;
-	b2Shape.SetAsBox(c2b(this->getContentSize().width / 2),
-	c2b(this->getContentSize().height / 2));
+	b2Vec2 points[6];
+	points[5] = b2Vec2(-width, 0);
+	points[4] = b2Vec2(-width, height);
+	points[3] = b2Vec2(width, height);
+	points[2] = b2Vec2(width, 0);
+	points[1] = b2Vec2(width * 0.6f, -height);
+	points[0] = b2Vec2(-width * 0.6f, -height);
+	b2Shape.Set(points, 6);
 
-	// Define the dynamic body fixture.
+//	b2Shape.SetAsBox(c2b(this->getContentSize().width / 2),
+//	c2b(this->getContentSize().height / 2));
+
+// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2Shape;
 	fixtureDef.density = 5.0f;
@@ -134,13 +146,13 @@ void Mushroom::setVec(MushroomVec vec) {
 void Mushroom::keepForward(float offset) {
 //	float x = this->b2PhyBody->GetMass() * WORLD_GRAVITY * friction;
 //	this->b2PhyBody->ApplyForceToCenter(b2Vec2(x, 0));
-	this->setSpeedX(MUSHROOM_FORWARD_SPEED + offset);
+	this->setSpeedX(forwardSpeed + offset);
 }
 
 void Mushroom::keepBack(float offset) {
 //	float x = this->b2PhyBody->GetMass() * WORLD_GRAVITY * friction;
 //	this->b2PhyBody->ApplyForceToCenter(b2Vec2(-x, 0));
-	this->setSpeedX(MUSHROOM_BACK_SPEED + offset);
+	this->setSpeedX(backSpeed + offset);
 }
 
 void Mushroom::stop() {
@@ -156,12 +168,15 @@ void Mushroom::jump() {
 //		b2Vec2 curVec = this->b2PhyBody->GetLinearVelocity();
 //		curVec.y = 0;
 //		this->b2PhyBody->SetLinearVelocity(curVec);
-		this->b2PhyBody->ApplyLinearImpulse(
-				b2Vec2(0, mass * MUSHROOM_JUMP_VELOCITY),
+		this->b2PhyBody->ApplyLinearImpulse(b2Vec2(0, mass * jumping_vec),
 				this->b2PhyBody->GetLocalCenter());
 	}
 }
 
+void Mushroom::acclVec(float delta) {
+	this->forwardSpeed *= delta;
+	this->backSpeed *= delta;
+}
 void Mushroom::beginContact(PhySprite *other, b2Contact* contact) {
 	if (other->getPhyType() == BRICK) {
 		this->contactFriction = contact->GetFriction();

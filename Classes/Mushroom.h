@@ -10,11 +10,20 @@
 
 #define MUSHROOM_FORWARD_SPEED 7  //蘑菇向右移动的速度
 #define MUSHROOM_BACK_SPEED -7 //蘑菇向左移动的速度
-#define MUSHROOM_JUMP_VELOCITY 15.0f //蘑菇向上跳起时的初速度
+#define MUSHROOM_JUMP_VELOCITY 17.0f //蘑菇向上跳起时的初速度
 #define ACC_PER_SEC 0.1f //暂时没用到
-
 #include "PhySprite.h"
 #include "Brick.h"
+
+struct MushroomParams {
+	MushroomParams() :
+			forward_speed(MUSHROOM_FORWARD_SPEED), back_speed(
+					MUSHROOM_BACK_SPEED), jump_velocity(MUSHROOM_JUMP_VELOCITY) {
+	}
+	float forward_speed;
+	float back_speed;
+	float jump_velocity;
+};
 
 enum MushroomVec {
 	vec_forward, vec_back, vec_nature
@@ -43,6 +52,8 @@ public:
 
 	void jump();
 
+	void acclVec(float delta);
+
 	virtual PHY_TYPE getPhyType();
 
 	virtual void beginContact(PhySprite *other, b2Contact* contact);
@@ -67,7 +78,8 @@ protected:
 private:
 	bool jumping;
 
-	float forwardSpeed, backSpeed, accPerSec, contactFriction, over;
+	float forwardSpeed, backSpeed, jumping_vec, accPerSec, contactFriction,
+			over;
 
 	void gameover();
 

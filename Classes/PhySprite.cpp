@@ -8,7 +8,7 @@
 #include "PhySprite.h"
 
 PhySprite::PhySprite() :
-		b2PhyBody(NULL) {
+		b2PhyBody(0) {
 }
 
 PhySprite::~PhySprite() {

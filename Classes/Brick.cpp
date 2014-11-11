@@ -13,6 +13,8 @@ USING_NS_CC;
 #define BRICK_WIDTH CCTextureCache::sharedTextureCache()->textureForKey("item_cubic.png")->getContentSize().width
 #define BRICK_HEIGHT CCTextureCache::sharedTextureCache()->textureForKey("item_cubic.png")->getContentSize().height
 
+BrickParams brick_params;
+
 BrickEmitter::BrickEmitter(CCLayer &layer) :
 		targetLayer(layer) {
 	//this->targetLayer = layer;
@@ -91,6 +93,13 @@ void BrickEmitter::resume() {
 		tailBricks->resume();
 	}
 }
+
+void BrickEmitter::acclVec(float scale) {
+	brick_params.speed *= scale;
+	if (tailBricks) {
+		tailBricks->acclVec(scale);
+	}
+}
 /*------------ Single Brick ----------*/
 
 Brick::Brick() {
@@ -113,8 +122,8 @@ bool Brick::init() {
 
 /*------------ Group Brick with b2Body ----------*/
 Bricks::Bricks() :
-		previous(0), next(0), score(1), movingSpeed(BRICKS_SPEED), emitter(0), status(
-				brick_ready), linearVelocity(b2Vec2_zero) {
+		previous(0), next(0), score(1), movingSpeed(brick_params.speed), emitter(
+				0), status(brick_ready), linearVelocity(b2Vec2_zero) {
 
 }
 
@@ -201,9 +210,9 @@ void Bricks::initPhyBody() {
 		b2PhyBody->SetLinearVelocity(b2Vec2(-abs(movingSpeed), 0));
 	}
 }
+
 void Bricks::update(float delta) {
-//检测是否出边界
-	updateStatus();
+	checkEdge(); //检测是否出边界
 	if (this->status == brick_over) {
 		this->removeFromParent();
 		return;
@@ -211,7 +220,7 @@ void Bricks::update(float delta) {
 	PhySprite::update(delta);
 }
 
-void Bricks::updateStatus() {
+void Bricks::checkEdge() {
 	CCPoint head = this->getPosition()
 			- ccp(this->getContentSize().width / 2, 0);
 	CCPoint tail = this->getPosition()
@@ -219,14 +228,14 @@ void Bricks::updateStatus() {
 	if (this->status == brick_ready && head.x < ccpp(0.5, 0).x) {
 		this->emitter->emitBrick(this);
 		this->status = brick_running;
-		onRunning();
+		onDisplay();
 		return;
 	}
 
 	if ((this->status == brick_running || this->status == brick_ready)
 			&& tail.x < ccpp(-0.5, -1).x) {
 		this->status = brick_over;
-		onOverStatus();
+		onDisappear();
 		return;
 	}
 }
@@ -246,9 +255,19 @@ void Bricks::resume() {
 	}
 }
 
+void Bricks::acclVec(float scale) {
+	if (this->b2PhyBody) {
+		b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
+		v.x *=scale;
+		b2PhyBody->SetLinearVelocity(v);
+	}
+	if (previous) {
+		previous->acclVec(scale);
+	}
+}
 HorizontalBricks::HorizontalBricks() :
-		speedScale(HOR_BRICKS_SPEED_SCALE) {
-	score = 2;
+		speedScale(brick_params.hor_speed_scale) {
+	score = 1;
 }
 
 HorizontalBricks::~HorizontalBricks() {
@@ -290,7 +309,7 @@ void HorizontalBricks::update(float delta) {
 
 }
 
-void HorizontalBricks::onRunning() {
+void HorizontalBricks::onDisplay() {
 	if (b2PhyBody) {
 		b2Vec2 v = b2PhyBody->GetLinearVelocity();
 		v.x = v.x * speedScale;
@@ -300,9 +319,9 @@ void HorizontalBricks::onRunning() {
 
 /* VerticalBricks */
 VerticalBricks::VerticalBricks() :
-		v0(VER_BRICKS_SPEED), accelerated(0), originalY(POS_JUNCTION), deltaUpdate(
+		v0(brick_params.ver_speed), accelerated(0), originalY(POS_JUNCTION), deltaUpdate(
 				0) {
-	score = 2;
+	score = 1;
 }
 
 VerticalBricks::~VerticalBricks() {
@@ -336,12 +355,12 @@ void VerticalBricks::update(float delta) {
 	Bricks::update(delta);
 }
 
-void VerticalBricks::onRunning() {
+void VerticalBricks::onDisplay() {
 	if (b2PhyBody) {
 		originalY = this->getPositionY();
 		b2Vec2 v = b2PhyBody->GetLinearVelocity();
 		v.y = v0;
-		accelerated = -abs(VER_ACCELERATED);
+		accelerated = -abs(brick_params.ver_accl);
 		b2PhyBody->SetLinearVelocity(v);
 
 	}

@@ -38,7 +38,9 @@ GameLayer::~GameLayer() {
 }
 
 void GameLayer::draw() {
-	//PhyWorld::shareWorld()->DrawDebugData();
+//#ifdef DEBUG
+	PhyWorld::shareWorld()->DrawDebugData();
+//#endif
 }
 
 bool GameLayer::init() {
@@ -404,4 +406,15 @@ void GameLayer::increateScore(CCObject *p_sender, unsigned int score) {
 	CCLabelTTF *scoreLabel = (CCLabelTTF*) p_sender;
 	scoreLabel->setString(
 			CCString::createWithFormat("%d", score)->getCString());
+	/*-- 达到一定的分数后，进行加速调整 --*/
+	if (score == 30) {
+		GameLayer *layer = (GameLayer *) scoreLabel->getParent();
+		Mushroom::getCurrentMushroom()->acclVec(0.9f);
+		layer->brickEmitter->acclVec(1.2f);
+	}
+	if (score == 80) {
+		GameLayer *layer = (GameLayer *) scoreLabel->getParent();
+		Mushroom::getCurrentMushroom()->acclVec(0.9f);
+		layer->brickEmitter->acclVec(1.2f);
+	}
 }
