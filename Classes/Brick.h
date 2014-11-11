@@ -11,7 +11,7 @@
 #include "PhySprite.h"
 #include "PhyWorld.h"
 
-#define BRICKS_SPEED 4 //高台从右向左的移送速度
+#define BRICKS_SPEED 4.0f //高台从右向左的移送速度
 #define HOR_BRICKS_SPEED_SCALE 1.8f //左右移动的高台，移动速度的放大倍数，他的速度=BRICKS_SPEED*HOR_BRICKS_SPEED_SCALE
 #define VER_BRICKS_SPEED 5.0f //上下移动的高台的初始的向上移动速度，与下面的值（VER_ACCELERATED）配合会影响高台上下的振幅
 #define VER_ACCELERATED 5.0f  //上下移动的高台的加速度，这个速度不要大于“重力加速度”，否则蘑菇会产生完全失重状态
@@ -24,10 +24,10 @@ struct BrickParams {
 		ver_speed = VER_BRICKS_SPEED;
 		ver_accl = VER_ACCELERATED;
 	}
-	unsigned int speed;
-	unsigned int hor_speed_scale;
-	unsigned int ver_speed;
-	unsigned int ver_accl;
+	float speed;
+	float hor_speed_scale;
+	float ver_speed;
+	float ver_accl;
 };
 
 enum BrickStatus {
