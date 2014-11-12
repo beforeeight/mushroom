@@ -165,8 +165,7 @@ void LocalResources::loadResources() {
 	CCTextureCache::sharedTextureCache()->addImage(("mushroom.png"));
 
 	/*-- 声音 --*/
-	//SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("bgm.mp3");
-	//SimpleAudioEngine::sharedEngine()->preloadEffect("jump.mp3");
+	SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("bgm.mp3");
 	/*-- 动画 --*/
 
 }
@@ -174,13 +173,13 @@ void LocalResources::loadResources() {
 void LocalResources::playBgMusic() {
 	if (LOCAL_CONTEXT->isSound()
 			&& !SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying()) {
-		//SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
+		SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
 	}
 }
 
 void LocalResources::playEffect(const char * mp3) {
 	if (LOCAL_CONTEXT->isSound()) {
-		//SimpleAudioEngine::sharedEngine()->playEffect(mp3);
+		SimpleAudioEngine::sharedEngine()->playEffect(mp3);
 	}
 }
 
@@ -222,13 +221,13 @@ bool Context::isSound() const {
 
 void Context::onSound() {
 	this->sound = true;
-	//SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bgm.mp3", true);
+	LOCAL_RESOURCES->playBgMusic();
 	save();
 }
 
 void Context::offSound() {
 	this->sound = false;
-	//SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
+	SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
 	save();
 }
 

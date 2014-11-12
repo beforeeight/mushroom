@@ -52,7 +52,7 @@ void Mushroom::createPhyBody() {
 	b2BodyDef.position = b2Vec2(c2b(this->getPosition().x),
 	c2b(this->getPosition().y));
 	b2PhyBody = PhyWorld::shareWorld()->CreateBody(&b2BodyDef);
-
+	//b2PhyBody->SetLinearDamping(1.0f);
 	float width = c2b(this->getContentSize().width / 2);
 	float height = c2b(this->getContentSize().height / 2);
 	b2PolygonShape b2Shape;
@@ -72,7 +72,7 @@ void Mushroom::createPhyBody() {
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &b2Shape;
 	fixtureDef.density = 5.0f;
-	fixtureDef.friction = 0.8f;
+	fixtureDef.friction = 1.0f;
 	// Add the shape to the body.
 	b2PhyBody->CreateFixture(&fixtureDef);
 	//b2PhyBody->SetLinearDamping(0.0f);
@@ -88,6 +88,7 @@ void Mushroom::gameover() {
 	if (!over) {
 		over = true;
 		//this->getParent()->removeAllChildren();
+		LOCAL_RESOURCES->playEffect("gameover.mp3");
 		CCDirector::sharedDirector()->replaceScene(
 				CCTransitionFadeDown::create(0.5f, FinishLayer::scene()));
 	}
@@ -110,7 +111,7 @@ void Mushroom::setSpeedX(float speed) {
 
 void Mushroom::update(float delta) {
 	float y = this->getPositionY();
-	if (y < -LOCAL_RESOLUTION.height / 2) {
+	if (y < -LOCAL_RESOLUTION.height / 2 - this->getContentSize().height) {
 		gameover();
 		return;
 	}

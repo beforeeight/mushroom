@@ -258,7 +258,7 @@ void Bricks::resume() {
 void Bricks::acclVec(float scale) {
 	if (this->b2PhyBody) {
 		b2Vec2 v = this->b2PhyBody->GetLinearVelocity();
-		v.x *=scale;
+		v.x *= scale;
 		b2PhyBody->SetLinearVelocity(v);
 	}
 	if (previous) {
@@ -293,7 +293,9 @@ void HorizontalBricks::update(float delta) {
 		float x2 = this->getPositionX() - this->getContentSize().width / 2;
 		if (x1 >= x2) {
 			b2Vec2 speed = b2PhyBody->GetLinearVelocity();
-			speed.x = abs(speed.x);
+			speed.x = abs(
+					brick_params.speed * brick_params.hor_speed_scale
+							- brick_params.speed);
 			b2PhyBody->SetLinearVelocity(speed);
 		}
 	}
@@ -302,7 +304,7 @@ void HorizontalBricks::update(float delta) {
 		float x2 = next->getPositionX() - next->getContentSize().width / 2;
 		if (x1 >= x2) {
 			b2Vec2 speed = b2PhyBody->GetLinearVelocity();
-			speed.x = -abs(speed.x);
+			speed.x = -abs(brick_params.speed * brick_params.hor_speed_scale);
 			b2PhyBody->SetLinearVelocity(speed);
 		}
 	}
