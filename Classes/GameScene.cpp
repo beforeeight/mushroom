@@ -407,14 +407,14 @@ void GameLayer::increateScore(CCObject *p_sender, unsigned int score) {
 	scoreLabel->setString(
 			CCString::createWithFormat("%d", score)->getCString());
 	/*-- 达到一定的分数后，进行加速调整 --*/
-	if (score == 30) {
+	if (score == 20) {
 		GameLayer *layer = (GameLayer *) scoreLabel->getParent();
-		Mushroom::getCurrentMushroom()->acclVec(0.9f);
+		Mushroom::getCurrentMushroom()->acclVec(0.7f);
 		layer->brickEmitter->acclVec(1.2f);
 	}
-	if (score == 80) {
+	if (score == 50) {
 		GameLayer *layer = (GameLayer *) scoreLabel->getParent();
-		Mushroom::getCurrentMushroom()->acclVec(0.9f);
+		Mushroom::getCurrentMushroom()->acclVec(1.2f);
 		layer->brickEmitter->acclVec(1.2f);
 	}
 }

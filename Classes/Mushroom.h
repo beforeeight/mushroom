@@ -8,9 +8,9 @@
 #ifndef MUSHROOM_H_
 #define MUSHROOM_H_
 
-#define MUSHROOM_FORWARD_SPEED 7  //蘑菇向右移动的速度
-#define MUSHROOM_BACK_SPEED -7 //蘑菇向左移动的速度
-#define MUSHROOM_JUMP_VELOCITY 17.0f //蘑菇向上跳起时的初速度
+#define MUSHROOM_FORWARD_SPEED 10  //蘑菇向右移动的速度
+#define MUSHROOM_BACK_SPEED -5 //蘑菇向左移动的速度
+#define MUSHROOM_JUMP_VELOCITY 13.0f //蘑菇向上跳起时的初速度
 #define ACC_PER_SEC 0.1f //暂时没用到
 #include "PhySprite.h"
 #include "Brick.h"

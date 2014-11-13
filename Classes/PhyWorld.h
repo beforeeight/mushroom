@@ -12,7 +12,7 @@
 
 #define VELOCITY_ITERATIONS 6 //不要改
 #define POSITION_ITERATIONS 2 //不要改
-#define WORLD_GRAVITY 20 //世界的重力加速度，地球上是9.8
+#define WORLD_GRAVITY 25 //世界的重力加速度，地球上是9.8
 
 class PhyWorld {
 public:
